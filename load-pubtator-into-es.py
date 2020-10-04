@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+from elasticsearch import Elasticsearch
 from json import loads
 import re
 
@@ -22,13 +23,14 @@ for line in open('litcovid2pubtator.json'):
         # print('---------------------')
         line = loads(line[1:])
         title = ''
-        date = None
+        date = orig_date = None
         annotations = defaultdict(set)
         for passage in line['passages']:
             if not title and passage['infons']['type'] in ('front','title'):
                 title = passage['text']
                 if 'journal' in passage['infons']:
                     journal = passage['infons']['journal']
+                    orig_date = journal
                     dates = [s.strip() for s in journal_split_regexp.split(journal)]
                     dates = [s for s in dates if date_match.match(s)]
                     if dates:
@@ -36,19 +38,31 @@ for line in open('litcovid2pubtator.json'):
                         for k,v in date_replacements.items():
                             date = date.replace(k,v)
                         date = date_end_fix.sub(r'\1', date)
-                        year,month,day = [date_pick.sub(r'\%i'%i, date) for i in range(1,3+1)]
+                        ymd = date_pick.sub(r'\1 \2 \3', date).split()
+                        ymd += [''] * (3-len(ymd))
+                        year,month,day = ymd
                         for k,v in mon_replacements.items():
                             month = month.replace(k,v)
                         date = year + ('-%.2i'%int(month) if month else '') + ('-%.2i'%int(day) if day else '')
+                        # print(date, orig_date, title)
             if 'annotations' in passage:
                 for a in passage['annotations']:
                     annotations[a['infons']['type'].lower()].add(a['text'].lower())
+        annotations = {k:sorted(v) for k,v in annotations.items()}
         article = {'date':date, 'title':title, **annotations}
         articles.append(article)
         if len(articles) == 500:
             break
 
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+
+def save(article):
+    # print(article)
+    res = es.index(index='pubtator-covid-19', body=article)
+    print(res['_id'])
+
 for article in articles:
-    print(article['date'], '~', article['title'], '~', {k:v for k,v in article.items() if k not in ('date', 'title')})
+    print(article['date'], '~', article['title'])
+    save(article)
 
 print('looked through %i articles' % len(articles))
