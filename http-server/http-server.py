@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 
 import bokeh
-from bokeh.embed import components as plot_html
+from bokeh.embed import json_item
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, WheelZoomTool
 from bokeh.models.formatters import DatetimeTickFormatter
 from bokeh.plotting import figure
 from collections import defaultdict
+from copy import deepcopy
 from dateutil import parser as date_parser
-from flask import Flask, request, render_template, send_from_directory
+from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
 
 
 max_hits = 1000 # number of ES documents to return at most
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 app = Flask(__name__)
+
+es_query = {
+    'query': {
+        'bool': {
+            'must': []
+        }
+    }
+}
 
 
 @app.route('/favicon.ico')
@@ -24,22 +33,28 @@ def favicon():
 
 @app.route('/covid-19')
 def index():
-    plot_html = plot('pubtator-covid-19', request.args)
-    return render_template('covid-19-research.html', bokeh_version=bokeh.__version__, plot=plot_html)
+    return render_template('covid-19-research.html', bokeh_version=bokeh.__version__)
 
 
-def plot(index, args):
-    print(args)
-    todo: search on 'AND'.join(args), like...
+@app.route('/plot/covid-19')
+def plot(index='pubtator-covid-19'):
+    kwargs = {}
+    if request.args:
+        kwargs = {'body': deepcopy(es_query)}
+        kwargs['body']['query']['bool']['must'] = [{'match': {k:vv}} for k,v in request.args.items() for vv in v.split(',')]
+        print(kwargs)
+    ss = es.search(index=index, size=max_hits, **kwargs)
     data = defaultdict(int)
-    ss = es.search(index=index, size=max_hits)
     categories = defaultdict(lambda: defaultdict(int))
+    articles = []
     for r in ss['hits']['hits']:
         s = r['_source']
-        if s['date']:
-            data[s['date']] += 1
+        if not s['date']:
+            continue
+        articles.append({'title':s['title'], 'date':s['date'], 'url':'https://pubmed.ncbi.nlm.nih.gov/%s/'%s['id']})
+        data[s['date']] += 1
         for k,v in s.items():
-            if k not in ('date','title'):
+            if k not in ('id','date','title'):
                 for label in v:
                     categories[k][label] += 1
 
@@ -53,16 +68,19 @@ def plot(index, args):
         cat_data = cat_data[-10:]
         if len(cat_data) >= 2:
             p = create_category_hbar(k, cat_data)
-            cat_plots.append(p)
+            cat_plots.append(json_item(p))
 
-    p = create_date_plot(x, y)
-    r = row(p, column(*cat_plots))
-    script,div = plot_html(r)
-    return script + div
+    main_title = '%i published pubtator COVID-19 articles' % len(articles)
+    if request.args:
+        sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
+        main_title += ' (%s)' % sargs
+    p = create_date_plot(main_title, x, y)
+    main_plot = json_item(p)
+    return jsonify({'main':main_plot, 'categories':cat_plots, 'articles':articles[:50]})
 
 
-def create_date_plot(x, y):
-    p = figure(title='Published pubtator COVID-19 articles', x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+def create_date_plot(title, x, y):
+    p = figure(title=title, x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
     zoom = WheelZoomTool(dimensions='width')
     p.add_tools(zoom)
     p.toolbar.active_scroll = zoom

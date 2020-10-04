@@ -6,8 +6,30 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="center-piece">
-    {{plot|safe}}
+  <div class="inline main-chart">
+    <div id="main-plot">
+    </div>
   </div>
+  <div class="inline categories">
+  </div>
+  <div class="articles-top">
+    <h2>Articles</h2>
+    <table class="articles">
+    </table>
+  </div>
+  <script>
+    var url = 'plot/covid-19' + window.location.search;
+    $.getJSON(url).done(function(data) {
+      Bokeh.embed.embed_item(data["main"], "main-plot");
+      data['categories'].map(function(v, i) {
+        var ccid = "component-plot-" + i;
+        $(".categories").append('<div class="component-chart"><div id="' + ccid + '"></div></div>');
+        Bokeh.embed.embed_item(data["categories"][i], ccid);
+      });
+      data['articles'].map(function(v, i) {
+        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
+      });
+    });
+  </script>
 </body>
 <html>

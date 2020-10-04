@@ -22,6 +22,7 @@ for line in open('litcovid2pubtator.json'):
     if '"_id": ' in line[:15]:
         # print('---------------------')
         line = loads(line[1:])
+        pubmed_id = line['_id'].split('|')[0]
         title = ''
         date = orig_date = None
         annotations = defaultdict(set)
@@ -49,7 +50,7 @@ for line in open('litcovid2pubtator.json'):
                 for a in passage['annotations']:
                     annotations[a['infons']['type'].lower()].add(a['text'].lower())
         annotations = {k:sorted(v) for k,v in annotations.items()}
-        article = {'date':date, 'title':title, **annotations}
+        article = {'id':pubmed_id, 'date':date, 'title':title, **annotations}
         articles.append(article)
         if len(articles) == 500:
             break
