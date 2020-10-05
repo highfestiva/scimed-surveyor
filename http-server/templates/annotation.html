@@ -1,14 +1,14 @@
 <html>
 <head>
-  <title>COVID-19</title>
+  <title>{{area}}</title>
   <link rel="stylesheet" href="/static/sci-survey.css" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <div class="back">
   </div>
-  <div class="main-categories">
-    <h1 class="category">Loading...</h1>
+  <div class="main-annotations">
+    <h1 class="annotation">Loading...</h1>
     <table class="labels">
     </table>
     <div class="articles-top">
@@ -18,10 +18,10 @@
     </div>
   </div>
   <script>
-    var url = '../plot/covid-19/{{category}}' + window.location.search;
+    var url = '../list-labels/{{annotation}}' + window.location.search;
     $.getJSON(url).done(function(data) {
-      data['categories'].map(function(v, i) {
-        $(".category").text(v["fullname"]);
+      data['annotations'].map(function(v, i) {
+        $(".annotation").text(v["fullname"]);
         var html = "";
         v["labels"].map(function(w) {
           html += '<tr><td><a href="?'+v["name"]+'='+w[0]+'">' + w[0] + '</a></td><td class="occurances">' + w[1] + '</td></tr>';
@@ -30,9 +30,9 @@
         $("a").click(function(ev) {
           ev.preventDefault();
           var url = new URL(window.location.href);
-          var val = url.searchParams.get("{{category}}");
+          var val = url.searchParams.get("{{annotation}}");
           val = (val? val+"," : "") + $(this).text();
-          url.searchParams.set("{{category}}", val);
+          url.searchParams.set("{{annotation}}", val);
           window.location.assign(url);
         });
       });
@@ -42,6 +42,7 @@
     });
     $(".back").click(function() {
       var l = window.location.href.split("/");
+      l.pop();
       l.pop();
       window.location.assign(l.join("/") + window.location.search);
     });

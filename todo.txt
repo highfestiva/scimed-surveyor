@@ -1,5 +1,8 @@
 +Visuella - ta bort (x_range) ändarna i tidsplotten, smeta ut måndads- och års-delarna
+Tech debt - namngivning, index, hårdkodningar
 Synonymer - MESH f. sjukdomar + annat för gener, osv.
 Docker
+Linuxmaskin
 Cardiac failure
+Dialog istf. egen sida för annotationerna
 Twitter

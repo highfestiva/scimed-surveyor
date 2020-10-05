@@ -34,39 +34,41 @@ def favicon():
     return send_from_directory('static', 'vgr.ico', mimetype='image/x-icon')
 
 
-@app.route('/covid-19')
-def covid_index():
-    return render_template('covid-19-research.html', bokeh_version=bokeh.__version__)
+@app.route('/<dsource>/<area>')
+def page_main(dsource, area):
+    return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area)
 
 
-@app.route('/covid-19/<category>')
-def covid_category(category):
-    return render_template('covid-19-category.html', bokeh_version=bokeh.__version__, category=category)
+@app.route('/<dsource>/<area>/annotation/<annotation>')
+def page_annotation(dsource, area, annotation):
+    return render_template('annotation.html', bokeh_version=bokeh.__version__, area=area, annotation=annotation)
 
 
-@app.route('/plot/covid-19')
-def main_plot(index='pubtator-covid-19'):
+@app.route('/<dsource>/<area>/plot-main')
+def plot_main(dsource, area):
+    index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
-    main_plot = create_main_plot(docs)
-    cat_plots = create_category_plots(docs, limit=8)
+    main_plot = create_main_plot(docs, area)
+    plots = create_annotation_plots(docs, limit=8)
     articles = articlify(docs)
-    return jsonify({'main':main_plot, 'categories':cat_plots, 'articles':articles[:50]})
+    return jsonify({'main':main_plot, 'annotations':plots, 'articles':articles[:50]})
 
 
-@app.route('/plot/covid-19/<category>')
-def plot_category(index='pubtator-covid-19', category=None):
+@app.route('/<dsource>/<area>/list-labels/<annotation>')
+def list_labels(dsource, area, annotation):
+    index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
-    categories = sum_categories(docs, only_category=category)
-    for k,v in categories.items():
-        categories[k] = sorted(v.items(), key=lambda kv:-kv[1])
-    r = {'categories':[{'name':k, 'labels':v} for k,v in categories.items()]}
-    for cat in r['categories']:
-        catname = cat['name']
+    annotations = sum_annotations(docs, only_annotation=annotation)
+    for k,v in annotations.items():
+        annotations[k] = sorted(v.items(), key=lambda kv:-kv[1])
+    r = {'annotations':[{'name':k, 'labels':v} for k,v in annotations.items()]}
+    for a in r['annotations']:
+        aname = a['name']
         if request.args:
-            items = sorted(request.args.items(), key=lambda kv: -1 if kv[0]==catname else 1)
-            sargs = ' AND '.join([(('%s=%s'%(k,v)) if k!=catname else v) for k,v in items])
-            catname += ' (FILTERED BY %s)' % sargs
-        cat['fullname'] = catname
+            items = sorted(request.args.items(), key=lambda kv: -1 if kv[0]==aname else 1)
+            sargs = ' AND '.join([(('%s=%s'%(k,v)) if k!=aname else v) for k,v in items])
+            aname += ' (FILTERED BY %s)' % sargs
+        a['fullname'] = aname
     r['articles'] = articlify(docs)[:50]
     return jsonify(r)
 
@@ -87,18 +89,18 @@ def fetch_docs(index, annotations=None):
     return docs
 
 
-def sum_categories(docs, only_category):
-    categories = defaultdict(lambda: defaultdict(int))
+def sum_annotations(docs, only_annotation):
+    annotations = defaultdict(lambda: defaultdict(int))
     for doc in docs:
         for k,v in doc['annotations'].items():
-            if only_category and k != only_category:
+            if only_annotation and k != only_annotation:
                 continue
             for label in v:
-                categories[k][label] += 1
-    return categories
+                annotations[k][label] += 1
+    return annotations
 
 
-def create_main_plot(docs):
+def create_main_plot(docs, area):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
@@ -108,7 +110,7 @@ def create_main_plot(docs):
     y = [cnt for t,cnt in series]
 
     # create main plot
-    main_title = '%i published pubtator COVID-19 articles' % len(docs)
+    main_title = '%i published pubtator %s articles' % (len(docs), area)
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
         main_title += ' (FILTERED BY %s)' % sargs
@@ -116,17 +118,17 @@ def create_main_plot(docs):
     return json_item(p)
 
 
-def create_category_plots(docs, limit):
-    categories = sum_categories(docs, only_category=None)
+def create_annotation_plots(docs, limit):
+    annotations = sum_annotations(docs, only_annotation=None)
 
-    cat_plots = []
-    for k in sorted(categories):
-        cat_data = [(lk,lv) for lk,lv in sorted(categories[k].items(), key=lambda kv: kv[1]) if lv>1]
-        cat_data = cat_data[-limit:]
-        if len(cat_data) >= 2:
-            p = create_category_hbar(k, cat_data)
-            cat_plots.append({'name':k, 'plot':json_item(p)})
-    return cat_plots
+    plots = []
+    for k in sorted(annotations):
+        data = [(lk,lv) for lk,lv in sorted(annotations[k].items(), key=lambda kv: kv[1]) if lv>1]
+        data = data[-limit:]
+        if len(data) >= 2:
+            p = create_annotation_hbar(k, data)
+            plots.append({'name':k, 'plot':json_item(p)})
+    return plots
 
 
 def smear_partial_dates(data):
@@ -192,7 +194,7 @@ def x_rng_percentile(n, x, y):
     return x0, x1
 
 
-def create_category_hbar(category, data):
+def create_annotation_hbar(annotation, data):
     '''Data in the format [('Label 1',52), ('Label 2, 148'), ...] in ascending order.'''
     labels = [k for k,v in data]
     p = figure(y_range=labels, sizing_mode='stretch_both', toolbar_location=None, tools=['tap'], plot_height=180)
@@ -214,14 +216,14 @@ def create_category_hbar(category, data):
             CustomJS(args=dict(labels=labels),
                     code='''var label = labels[cb_obj.indices[0]];
                             var url = new URL(window.location.href);
-                            var category = "%s";
-                            var lst = url.searchParams.get(category) || [];
+                            var annotation = "%s";
+                            var lst = url.searchParams.get(annotation) || [];
                             if (typeof lst.push !== "function") {
                                 lst = [lst];
                             }
                             lst.push(label);
-                            url.searchParams.set(category, lst);
-                            window.location.assign(url);''' % category))
+                            url.searchParams.set(annotation, lst);
+                            window.location.assign(url);''' % annotation))
     return p
 
 

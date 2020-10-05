@@ -20,20 +20,20 @@ html, body {
 	width: 70%;
 	height: 90%;
 }
-.sub-categories {
+.sub-annotations {
     width: 27%;
     position: absolute;
     margin: 1em 0 0 2vw;
 }
-.category-chart {
+.annotation-chart {
 	height: 15vh;
 }
-.category > p {
+.annotation > p {
 	margin: 0;
 	font-size: 0.8em;
 	color: #616161;
 }
-.main-categories {
+.main-annotations {
 	padding: 2em;
 }
 

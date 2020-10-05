@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>COVID-19</title>
+  <title>{{area}}</title>
   <link rel="stylesheet" href="/static/sci-survey.css" type="text/css">
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-{{bokeh_version}}.min.js" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
@@ -10,7 +10,7 @@
     <div id="main-plot">
     </div>
   </div>
-  <div class="inline sub-categories">
+  <div class="inline sub-annotations">
   </div>
   <div class="articles-top">
     <h2>Articles</h2>
@@ -18,14 +18,14 @@
     </table>
   </div>
   <script>
-    var url = 'plot/covid-19' + window.location.search;
+    var url = '{{area}}/plot-main' + window.location.search;
     $.getJSON(url).done(function(data) {
       Bokeh.embed.embed_item(data["main"], "main-plot");
-      data['categories'].map(function(v, i) {
-        var cId = "category-plot-" + i;
-        var cat = v["name"];
-        var cats = cat + window.location.search;
-        $(".sub-categories").append('<div class="category"><p><a href="covid-19/'+cats+'">'+cat+'</a></p><div class="category-chart"><div id="'+cId+'"></div></div></div>');
+      data['annotations'].map(function(v, i) {
+        var cId = "annotation-plot-" + i;
+        var annotation = v["name"];
+        var annotationUrl = annotation + window.location.search;
+        $(".sub-annotations").append('<div class="annotation"><p><a href="{{area}}/annotation/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       data['articles'].map(function(v, i) {
