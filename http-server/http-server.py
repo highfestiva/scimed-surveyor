@@ -157,7 +157,8 @@ def articlify(docs):
 
 
 def create_date_plot(title, x, y):
-    p = figure(title=title, x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+    x0,x1 = x_rng_percentile(1, x, y)
+    p = figure(title=title, x_range=(x0, x1), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
     zoom = WheelZoomTool(dimensions='width')
     p.add_tools(zoom)
     p.toolbar.active_scroll = zoom
@@ -173,6 +174,22 @@ def create_date_plot(title, x, y):
     p.xaxis.formatter = dtf
     p.vbar(x=x, top=y, width=24*60*60*1000, color='#005500')
     return p
+
+
+def x_rng_percentile(n, x, y):
+    '''Drop first and last n percentiles. Return x0, x1.'''
+    p0 = sum(y)*n / 100
+    p1 = sum(y)*(100-n) / 100
+    x0 = x[0]
+    x1 = x[-1]
+    ys = 0
+    for xx,yy in zip(x, y):
+        if ys < p0:
+            x0 = xx
+        ys += yy
+        if ys < p1:
+            x1 = xx
+    return x0, x1
 
 
 def create_category_hbar(category, data):
