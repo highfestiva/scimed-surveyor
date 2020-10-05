@@ -5,6 +5,14 @@ html, body {
 	border: 0;
 }
 
+.back {
+	background-image: url("/static/back.svg");
+	cursor: pointer;
+	width: 2em;
+	height: 2em;
+	position: fixed;
+}
+
 .inline {
 	display: inline-block;
 }
@@ -12,7 +20,7 @@ html, body {
 	width: 70%;
 	height: 90%;
 }
-.categories {
+.sub-categories {
 	width: 29%;
 	position: absolute;
 	margin: 10px 0 0 10px;
@@ -24,6 +32,9 @@ html, body {
 	margin: 0;
 	font-size: 0.8em;
 	color: #616161;
+}
+.main-categories {
+	padding: 2em;
 }
 
 table.articles {
@@ -38,9 +49,13 @@ table.articles td {
 	border-bottom: 1px solid #ddd;
 	padding: 0.6em;
 }
-.line-no {
+.line-no, .occurances {
 	text-align: right;
 }
+.occurances {
+    padding-right: 5em;
+}
+
 a:link, a:visited {
 	text-decoration: none;
 }
@@ -49,4 +64,12 @@ a:link {
 }
 a:hover {
 	color: #444;
+}
+
+table.labels {
+    margin-bottom: 5em;
+    max-height: 60%;
+    overflow-y: scroll;
+    display: inline-block;
+    border-bottom: 1px solid #ddd;
 }

@@ -5,8 +5,9 @@ from bokeh.embed import json_item
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, WheelZoomTool
 from bokeh.models.formatters import DatetimeTickFormatter
-from bokeh.palettes import Category20
+from bokeh.palettes import cividis, Category20
 from bokeh.plotting import figure
+from colorcet import glasbey
 from collections import defaultdict
 from copy import deepcopy
 from dateutil import parser as date_parser
@@ -14,7 +15,7 @@ from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
 
 
-max_hits = 10000 # number of ES documents to return at most
+chunk_hits = 10000
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 app = Flask(__name__)
 
@@ -33,57 +34,104 @@ def favicon():
 
 
 @app.route('/covid-19')
-def index():
+def covid_index():
     return render_template('covid-19-research.html', bokeh_version=bokeh.__version__)
 
 
-@app.route('/plot/covid-19')
-def plot(index='pubtator-covid-19'):
-    kwargs = {}
-    if request.args:
-        kwargs = {'body': deepcopy(es_query)}
-        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv}} for k,v in request.args.items() for vv in v.split(',')]
-        print(kwargs)
-    ss = es.search(index=index, size=max_hits, **kwargs)
-    data = defaultdict(int)
-    categories = defaultdict(lambda: defaultdict(int))
-    articles = []
-    for r in ss['hits']['hits']:
-        s = r['_source']
-        if not s['date']:
-            continue
-        articles.append({'title':s['title'], 'date':s['date'], 'url':'https://pubmed.ncbi.nlm.nih.gov/%s/'%s['id']})
-        data[s['date']] += 1
-        for k,v in s['annotations'].items():
-            if k not in ('id','date','title'):
-                for label in v:
-                    categories[k][label] += 1
+@app.route('/covid-19/<category>')
+def covid_category(category):
+    return render_template('covid-19-category.html', bokeh_version=bokeh.__version__, category=category)
 
+
+@app.route('/plot/covid-19')
+def main_plot(index='pubtator-covid-19'):
+    docs = fetch_docs(index=index, annotations=request.args)
+    main_plot = create_main_plot(docs)
+    cat_plots = create_category_plots(docs, limit=8)
+    articles = articlify(docs)
+    return jsonify({'main':main_plot, 'categories':cat_plots, 'articles':articles[:50]})
+
+
+@app.route('/plot/covid-19/<category>')
+def plot_category(index='pubtator-covid-19', category=None):
+    docs = fetch_docs(index=index, annotations=request.args)
+    categories = sum_categories(docs, only_category=category)
+    for k,v in categories.items():
+        categories[k] = sorted(v.items(), key=lambda kv:-kv[1])
+    r = {'categories':[{'name':k, 'labels':v} for k,v in categories.items()]}
+    for cat in r['categories']:
+        catname = cat['name']
+        if request.args:
+            items = sorted(request.args.items(), key=lambda kv: -1 if kv[0]==catname else 1)
+            sargs = ' AND '.join([(('%s=%s'%(k,v)) if k!=catname else v) for k,v in items])
+            catname += ' (FILTERED BY %s)' % sargs
+        cat['fullname'] = catname
+    r['articles'] = articlify(docs)[:50]
+    return jsonify(r)
+
+
+def fetch_docs(index, annotations=None):
+    kwargs = {}
+    if annotations:
+        kwargs = {'body': deepcopy(es_query)}
+        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv}} for k,v in annotations.items() for vv in v.split(',')]
+        print(kwargs)
+    docs = []
+    r = es.search(index=index, size=chunk_hits, scroll='2s', **kwargs)
+    while len(r['hits']['hits']):
+        docs.extend(r['hits']['hits'])
+        r = es.scroll(scroll_id = r['_scroll_id'], scroll = '2s')
+    docs = [d['_source'] for d in docs]
+    docs = [d for d in docs if d['date']] # only keep documents with dates
+    return docs
+
+
+def sum_categories(docs, only_category):
+    categories = defaultdict(lambda: defaultdict(int))
+    for doc in docs:
+        for k,v in doc['annotations'].items():
+            if only_category and k != only_category:
+                continue
+            for label in v:
+                categories[k][label] += 1
+    return categories
+
+
+def create_main_plot(docs):
+    data = defaultdict(int)
+    for doc in docs:
+        data[doc['date']] += 1
     series = sorted([(date_parser.isoparse(t),cnt) for t,cnt in data.items()])
     x = [t for t,cnt in series]
     y = [cnt for t,cnt in series]
 
     # create main plot
-    main_title = '%i published pubtator COVID-19 articles' % len(articles)
+    main_title = '%i published pubtator COVID-19 articles' % len(docs)
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
-        main_title += ' (%s)' % sargs
+        main_title += ' (FILTERED BY %s)' % sargs
     p = create_date_plot(main_title, x, y)
-    main_plot = json_item(p)
+    return json_item(p)
 
-    # create category plots
+
+def create_category_plots(docs, limit):
+    categories = sum_categories(docs, only_category=None)
+
     cat_plots = []
     for k in sorted(categories):
         cat_data = [(lk,lv) for lk,lv in sorted(categories[k].items(), key=lambda kv: kv[1]) if lv>1]
-        cat_data = cat_data[-10:]
+        cat_data = cat_data[-limit:]
         if len(cat_data) >= 2:
             p = create_category_hbar(k, cat_data)
             cat_plots.append({'name':k, 'plot':json_item(p)})
+    return cat_plots
 
-    # sort articles
-    articles = sorted(articles, key=lambda a: a['date'], reverse=True)
 
-    return jsonify({'main':main_plot, 'categories':cat_plots, 'articles':articles[:50]})
+def articlify(docs):
+    articles = []
+    for doc in docs:
+        articles.append({'title':doc['title'], 'date':doc['date'], 'url':'https://pubmed.ncbi.nlm.nih.gov/%s/'%doc['id']})
+    return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 
 def create_date_plot(title, x, y):
@@ -114,7 +162,12 @@ def create_category_hbar(category, data):
     p.min_border_right = 0
     p.min_border_top = 0
     p.min_border_bottom = 0
-    ds = ColumnDataSource(dict(labels=labels, value=[v for k,v in data], color=Category20[max(3, len(labels))][::-1]))
+    cmap = glasbey[:]#[8:] + glasbey[:8]
+    if len(cmap) < len(labels):
+        cmap = cmap * (len(labels)//len(cmap)+1)
+    cmap = cmap[2:] + cmap[:2]
+    cmap = cmap[:len(labels)][::-1]
+    ds = ColumnDataSource(dict(labels=labels, value=[v for k,v in data], color=cmap))
     p.hbar(y='labels', right='value', height=0.9, color='color', source=ds)
     p.text(y='labels', text='labels', text_baseline='middle', x=0, x_offset=3, text_font_size='9px', source=ds)
     ds.selected.js_on_change(

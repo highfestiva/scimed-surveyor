@@ -1,0 +1,50 @@
+<html>
+<head>
+  <title>COVID-19</title>
+  <link rel="stylesheet" href="/static/sci-survey.css" type="text/css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="back">
+  </div>
+  <div class="main-categories">
+    <h1 class="category">Loading...</h1>
+    <table class="labels">
+    </table>
+    <div class="articles-top">
+      <h2>Articles</h2>
+      <table class="articles">
+      </table>
+    </div>
+  </div>
+  <script>
+    var url = '../plot/covid-19/{{category}}' + window.location.search;
+    $.getJSON(url).done(function(data) {
+      data['categories'].map(function(v, i) {
+        $(".category").text(v["fullname"]);
+        var html = "";
+        v["labels"].map(function(w) {
+          html += '<tr><td><a href="?'+v["name"]+'='+w[0]+'">' + w[0] + '</a></td><td class="occurances">' + w[1] + '</td></tr>';
+        });
+        $(".labels").html(html);
+        $("a").click(function(ev) {
+          ev.preventDefault();
+          var url = new URL(window.location.href);
+          var val = url.searchParams.get("{{category}}");
+          val = (val? val+"," : "") + $(this).text();
+          url.searchParams.set("{{category}}", val);
+          window.location.assign(url);
+        });
+      });
+      data['articles'].map(function(v, i) {
+        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
+      });
+    });
+    $(".back").click(function() {
+      var l = window.location.href.split("/");
+      l.pop();
+      window.location.assign(l.join("/") + window.location.search);
+    });
+  </script>
+</body>
+<html>

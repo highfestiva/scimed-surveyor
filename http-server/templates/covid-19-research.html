@@ -10,7 +10,7 @@
     <div id="main-plot">
     </div>
   </div>
-  <div class="inline categories">
+  <div class="inline sub-categories">
   </div>
   <div class="articles-top">
     <h2>Articles</h2>
@@ -23,7 +23,9 @@
       Bokeh.embed.embed_item(data["main"], "main-plot");
       data['categories'].map(function(v, i) {
         var cId = "category-plot-" + i;
-        $(".categories").append('<div class="category"><p>' + v["name"] + '</p><div class="category-chart"><div id="' + cId + '"></div></div></div>');
+        var cat = v["name"];
+        var cats = cat + window.location.search;
+        $(".sub-categories").append('<div class="category"><p><a href="covid-19/'+cats+'">'+cat+'</a></p><div class="category-chart"><div id="'+cId+'"></div></div></div>');
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       data['articles'].map(function(v, i) {
