@@ -7,6 +7,7 @@ from bokeh.models import ColumnDataSource, CustomJS, WheelZoomTool
 from bokeh.models.formatters import DatetimeTickFormatter
 from bokeh.palettes import cividis, Category20
 from bokeh.plotting import figure
+import calendar
 from colorcet import glasbey
 from collections import defaultdict
 from copy import deepcopy
@@ -101,6 +102,7 @@ def create_main_plot(docs):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
+    smear_partial_dates(data)
     series = sorted([(date_parser.isoparse(t),cnt) for t,cnt in data.items()])
     x = [t for t,cnt in series]
     y = [cnt for t,cnt in series]
@@ -125,6 +127,26 @@ def create_category_plots(docs, limit):
             p = create_category_hbar(k, cat_data)
             cat_plots.append({'name':k, 'plot':json_item(p)})
     return cat_plots
+
+
+def smear_partial_dates(data):
+    for date,cnt in list(data.items()):
+        months = []
+        outp_dates = []
+        if len(date) <= 4:
+            year = int(date)
+            months = range(1, 12+1)
+        elif len(date) <= 7:
+            year,month = [int(e) for e in date.split('-')]
+            months = [month]
+        for month in months:
+            num_days = calendar.monthrange(year, month)[1]
+            outp_dates += ['%i-%.2i-%.2i' % (year, month, day) for day in range(1, num_days+1)]
+        if outp_dates:
+            val = cnt / len(outp_dates)
+            for d in outp_dates:
+                data[d] += val
+            del data[date]
 
 
 def articlify(docs):

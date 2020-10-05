@@ -21,9 +21,9 @@ html, body {
 	height: 90%;
 }
 .sub-categories {
-	width: 29%;
-	position: absolute;
-	margin: 10px 0 0 10px;
+    width: 27%;
+    position: absolute;
+    margin: 1em 0 0 2vw;
 }
 .category-chart {
 	height: 15vh;
@@ -56,13 +56,13 @@ table.articles td {
     padding-right: 5em;
 }
 
-a:link, a:visited {
+table a:link, table a:visited {
 	text-decoration: none;
 }
-a:link {
+table a:link {
 	color: #777;
 }
-a:hover {
+table a:hover {
 	color: #444;
 }
 
