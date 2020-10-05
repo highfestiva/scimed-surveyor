@@ -1,3 +1,10 @@
+html, body {
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
 .inline {
 	display: inline-block;
 }
@@ -7,11 +14,39 @@
 }
 .categories {
 	width: 29%;
-	height: 90%;
+	position: absolute;
+	margin: 10px 0 0 10px;
 }
-.component-chart {
+.category-chart {
 	height: 15vh;
+}
+.category > p {
+	margin: 0;
+	font-size: 0.8em;
+	color: #616161;
+}
+
+table.articles {
+	width: 100%;
+	border-spacing: 0;
+}
+table.articles > tr {
+	height: 2em;
+	color: #777;
+}
+table.articles td {
+	border-bottom: 1px solid #ddd;
+	padding: 0.6em;
 }
 .line-no {
 	text-align: right;
+}
+a:link, a:visited {
+	text-decoration: none;
+}
+a:link {
+	color: #777;
+}
+a:hover {
+	color: #444;
 }

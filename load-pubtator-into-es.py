@@ -14,8 +14,18 @@ date_replacements = {   ' / ': '/',
                         'Spring': 'May',
                         'Summer': 'Aug',
                         'Autumn': 'Nov',
+                        'Fall':   'Nov',
                         'Winter': 'Feb'     }
 mon_replacements = {mon.title():str(i+1) for i,mon in enumerate('jan feb mar apr may jun jul aug sep oct nov dec'.split())}
+
+
+def datefmt(unit, maxval):
+    if unit and unit.isdecimal():
+        ui = int(unit)
+        if 1 <= ui <= maxval:
+            return '-%.2i'%int(ui)
+    return ''
+
 
 articles = []
 for line in open('litcovid2pubtator.json'):
@@ -44,15 +54,15 @@ for line in open('litcovid2pubtator.json'):
                         year,month,day = ymd
                         for k,v in mon_replacements.items():
                             month = month.replace(k,v)
-                        date = year + ('-%.2i'%int(month) if month else '') + ('-%.2i'%int(day) if day else '')
+                        date = year + datefmt(month, 12) + datefmt(day, 31)
                         # print(date, orig_date, title)
             if 'annotations' in passage:
                 for a in passage['annotations']:
                     annotations[a['infons']['type'].lower()].add(a['text'].lower())
         annotations = {k:sorted(v) for k,v in annotations.items()}
-        article = {'id':pubmed_id, 'date':date, 'title':title, **annotations}
+        article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
         articles.append(article)
-        if len(articles) == 500:
+        if len(articles) == 5000:
             break
 
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
@@ -60,7 +70,7 @@ es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 def save(article):
     # print(article)
     res = es.index(index='pubtator-covid-19', body=article)
-    print(res['_id'])
+    # print(res['_id'])
 
 for article in articles:
     print(article['date'], '~', article['title'])

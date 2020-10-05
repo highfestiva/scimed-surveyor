@@ -22,9 +22,9 @@
     $.getJSON(url).done(function(data) {
       Bokeh.embed.embed_item(data["main"], "main-plot");
       data['categories'].map(function(v, i) {
-        var ccid = "component-plot-" + i;
-        $(".categories").append('<div class="component-chart"><div id="' + ccid + '"></div></div>');
-        Bokeh.embed.embed_item(data["categories"][i], ccid);
+        var cId = "category-plot-" + i;
+        $(".categories").append('<div class="category"><p>' + v["name"] + '</p><div class="category-chart"><div id="' + cId + '"></div></div></div>');
+        Bokeh.embed.embed_item(v["plot"], cId);
       });
       data['articles'].map(function(v, i) {
         $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
