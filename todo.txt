@@ -14,7 +14,7 @@ VGR-logga
 +#Article - table header
 +Marginaler
 +Reducera linjer
-Responsive design
++Responsive design
 Dialogruta
 
 Skript för att hämta data
