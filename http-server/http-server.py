@@ -41,12 +41,6 @@ def favicon():
 def page_main(dsource, area):
     return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area)
 
-
-@app.route('/<dsource>/<area>/annotation/<annotation>')
-def page_annotation(dsource, area, annotation):
-    return render_template('annotation.html', bokeh_version=bokeh.__version__, area=area, annotation=annotation)
-
-
 @app.route('/<dsource>/<area>/plot-main')
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
@@ -72,8 +66,6 @@ def list_labels(dsource, area, annotation):
             sargs = ' AND '.join([(('%s=%s'%(k,v)) if k!=aname else v) for k,v in items])
             aname += ' (FILTERED BY %s)' % sargs
         a['fullname'] = aname
-    r['articles'] = articlify(docs)[:50]
-    r['name'] = 'Articles'
     return jsonify(r)
 
 

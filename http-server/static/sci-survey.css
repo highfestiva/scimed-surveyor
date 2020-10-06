@@ -23,6 +23,17 @@ html, body {
 	height: 70vh;
 	max-height: 484px;
 }
+.vgr-name {
+	color: #fff;
+	transform-origin: 0 0;
+	transform: rotate(-90deg);
+	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+	width: 500px;
+    position: absolute;
+    bottom: 70px;
+    left: 0.7vw;
+    font-size: 1.5vw;
+}
 
 .inline {
 	display: inline-block;

@@ -10,6 +10,7 @@
     <div class="vgr-background">
     </div>
     <div class="vgr-logo">
+      <div class="vgr-name">Sci-Med Surveyor</div>
     </div>
   </div>
   <div class="inline main-chart">
@@ -44,7 +45,14 @@
         var cId = "annotation-plot-" + i;
         var annotation = v["name"];
         var annotationUrl = annotation + window.location.search;
-        $(".sub-annotations").append('<div class="annotation"><p><a href="{{area}}/annotation/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
+        $(".sub-annotations").append('<div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
+        // open annotation dialog
+        $(".annotation-link").click(function(ev) {
+          ev.preventDefault();
+          $.getJSON($(this).attr("href")).done(function(data) {
+            $(".annotation-dialog").text(data);
+          });
+        });
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       $(".articles").append('<tr><td class="line-no header">#</td><td class="header">Articles</td></tr>');
@@ -53,5 +61,7 @@
       });
     });
   </script>
+  <div style="display:None" class="annotation-dialog">
+  </div>
 </body>
 <html>
