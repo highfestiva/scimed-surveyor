@@ -1,6 +1,20 @@
 +Visuella - ta bort (x_range) ändarna i tidsplotten, smeta ut måndads- och års-delarna
 +Tech debt - namngivning, index, hårdkodningar
-Synonymer - MESH f. sjukdomar + annat för gener, osv.
++Synonymer - MESH f. sjukdomar + annat för gener, osv.
++Plocka bort species
+
+Lägg huvudplot-titel separat
++Smeta mer i tidsaxelgrafen
++Bort med Bokeh-loggan
++Grönfärgen
++Reducera kompisfärger
++Axeltitlar bort
++Typsnittstorlek
++#Article - table header
++Marginaler
++Reducera linjer
+Dialogruta
+
 Docker
 Linuxmaskin
 Cardiac failure

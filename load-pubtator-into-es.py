@@ -27,8 +27,40 @@ def datefmt(unit, maxval):
     return ''
 
 
+print('loading mesh files...')
+id2shortname = {}
+for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin','SH = ')]:
+    for line in open('data/'+fname, encoding='utf8'):
+        if line.startswith(term_id):
+            term = line.partition(' = ')[2].strip()
+        elif line.startswith('UI ='):
+            mid = 'MESH:' + line.partition(' = ')[2].strip()
+            id2shortname[mid] = term
+
+
+# create a gene dict based on prevalence
+gene2word2cnt = defaultdict(lambda: defaultdict(int))
+print('checking gene prevalence...')
+for i,line in enumerate(open('data/litcovid2pubtator.json')):
+    if '"_id": ' in line[:15]:
+        if i%11:
+            print('%i'%i, end='\r')
+        line = loads(line[1:])
+        for passage in line['passages']:
+            pas = passage.get('annotations') or []
+            for a in pas:
+                infons = a['infons']
+                if infons['type'] == 'Gene':
+                    gid = infons.get('identifier')
+                    gene2word2cnt[gid][a['text']] += 1
+for gid,word2cnt in gene2word2cnt.items():
+    most_common = sorted(word2cnt.items(), key=lambda kv:-kv[1])[0][0]
+    id2shortname[gid] = most_common
+
+
+print('loading data...')
 articles = []
-for line in open('litcovid2pubtator.json'):
+for line in open('data/litcovid2pubtator.json'):
     if '"_id": ' in line[:15]:
         # print('---------------------')
         line = loads(line[1:])
@@ -56,9 +88,12 @@ for line in open('litcovid2pubtator.json'):
                             month = month.replace(k,v)
                         date = year + datefmt(month, 12) + datefmt(day, 31)
                         # print(date, orig_date, title)
-            if 'annotations' in passage:
-                for a in passage['annotations']:
-                    annotations[a['infons']['type'].lower()].add(a['text'].lower())
+            pas = passage.get('annotations') or []
+            for a in pas:
+                infons = a['infons']
+                lookup = infons.get('identifier')
+                txt = id2shortname.get(lookup)
+                annotations[infons['type'].lower()].add(txt or a['text'].lower())
         annotations = {k:sorted(v) for k,v in annotations.items()}
         article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
         articles.append(article)
@@ -72,8 +107,11 @@ def save(article):
     res = es.index(index='pubtator-covid-19', body=article)
     # print(res['_id'])
 
-for article in articles:
-    print(article['date'], '~', article['title'])
+print('saving...')
+for i,article in enumerate(articles):
+    if i%11:
+        print(i, article['date'], '~', article['title'][:50], end='\r')
     save(article)
 
-print('looked through %i articles' % len(articles))
+print()
+print('saved %i articles' % len(articles))

@@ -4,7 +4,7 @@ import bokeh
 from bokeh.embed import json_item
 from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, WheelZoomTool
-from bokeh.models.formatters import DatetimeTickFormatter
+from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
 from bokeh.palettes import cividis, Category20
 from bokeh.plotting import figure
 import calendar
@@ -14,6 +14,7 @@ from copy import deepcopy
 from dateutil import parser as date_parser
 from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
+import pandas as pd
 
 
 chunk_hits = 10000
@@ -27,6 +28,8 @@ es_query = {
         }
     }
 }
+
+skip_annotations = ('species',)
 
 
 @app.route('/favicon.ico')
@@ -49,7 +52,7 @@ def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
     main_plot = create_main_plot(docs, dsource, area)
-    plots = create_annotation_plots(docs, limit=8)
+    plots = create_annotation_plots(docs, limit=7)
     articles = articlify(docs)
     return jsonify({'main':main_plot, 'annotations':plots, 'articles':articles[:50]})
 
@@ -70,6 +73,7 @@ def list_labels(dsource, area, annotation):
             aname += ' (FILTERED BY %s)' % sargs
         a['fullname'] = aname
     r['articles'] = articlify(docs)[:50]
+    r['name'] = 'Articles'
     return jsonify(r)
 
 
@@ -93,6 +97,8 @@ def sum_annotations(docs, only_annotation):
     annotations = defaultdict(lambda: defaultdict(int))
     for doc in docs:
         for k,v in doc['annotations'].items():
+            if k in skip_annotations:
+                continue
             if only_annotation and k != only_annotation:
                 continue
             for label in v:
@@ -105,16 +111,15 @@ def create_main_plot(docs, dsource, area):
     for doc in docs:
         data[doc['date']] += 1
     smear_partial_dates(data)
-    series = sorted([(date_parser.isoparse(t),cnt) for t,cnt in data.items()])
-    x = [t for t,cnt in series]
-    y = [cnt for t,cnt in series]
+    df = pd.DataFrame(sorted((k,v) for k,v in data.items()), columns=['t','n'])
+    df['t'] = pd.to_datetime(df.t)
 
     # create main plot
     main_title = '%i published %s %s articles' % (len(docs), area, dsource)
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
         main_title += ' (FILTERED BY %s)' % sargs
-    p = create_date_plot(main_title, x, y)
+    p = create_date_plot(main_title, df)
     return json_item(p)
 
 
@@ -126,12 +131,13 @@ def create_annotation_plots(docs, limit):
         data = [(lk,lv) for lk,lv in sorted(annotations[k].items(), key=lambda kv: kv[1]) if lv>1]
         data = data[-limit:]
         if len(data) >= 2:
-            p = create_annotation_hbar(k, data)
+            p = create_annotation_hbar(k, data, col_index=len(plots))
             plots.append({'name':k, 'plot':json_item(p)})
     return plots
 
 
 def smear_partial_dates(data):
+    '''2020-04 -> every day of month. Same applies to year.'''
     for date,cnt in list(data.items()):
         months = []
         outp_dates = []
@@ -158,14 +164,14 @@ def articlify(docs):
     return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 
-def create_date_plot(title, x, y):
-    x0,x1 = x_rng_percentile(1, x, y)
-    p = figure(title=title, x_range=(x0, x1), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+def create_date_plot(title, df):
+    x0,x1 = x_rng_percentile(df, 1)
+    ymax = df.n.max() * 1.05
+    p = figure(title=title, x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+    p.toolbar.logo = None
     zoom = WheelZoomTool(dimensions='width')
     p.add_tools(zoom)
     p.toolbar.active_scroll = zoom
-    p.xaxis.axis_label = 'Time'
-    p.yaxis.axis_label = 'Articles'
     dtf = DatetimeTickFormatter()
     dtf.milliseconds = ['%T']
     dtf.seconds = dtf.minsec = ['%T']
@@ -174,41 +180,39 @@ def create_date_plot(title, x, y):
     dtf.months = ['%F']
     dtf.years = ['%F']
     p.xaxis.formatter = dtf
-    p.vbar(x=x, top=y, width=24*60*60*1000, color='#005500')
+    p.xgrid.grid_line_color = None
+    p.vbar(x=df.t, top=df.n, width=24*60*60*1000, color='#ccffcc')
+    smooth = df.n.rolling(14, center=True).mean()
+    p.line(x=df.t, y=smooth, color='#005500')
     return p
 
 
-def x_rng_percentile(n, x, y):
+def x_rng_percentile(df, pct):
     '''Drop first and last n percentiles. Return x0, x1.'''
-    p0 = sum(y)*n / 100
-    p1 = sum(y)*(100-n) / 100
-    x0 = x[0]
-    x1 = x[-1]
-    ys = 0
-    for xx,yy in zip(x, y):
-        if ys < p0:
-            x0 = xx
-        ys += yy
-        if ys < p1:
-            x1 = xx
+    s = df.n.sum()
+    cs = df.n.fillna(0).cumsum()
+    x0 = df.loc[cs > s*pct/100, 't'].iloc[0]
+    x1 = df.loc[cs < s*(100-pct)/100, 't'].iloc[-1]
     return x0, x1
 
 
-def create_annotation_hbar(annotation, data):
+def create_annotation_hbar(annotation, data, col_index=0):
     '''Data in the format [('Label 1',52), ('Label 2, 148'), ...] in ascending order.'''
     labels = [k for k,v in data]
-    p = figure(y_range=labels, sizing_mode='stretch_both', toolbar_location=None, tools=['tap'], plot_height=180)
+    values = [v for k,v in data]
+    xmax = max(values) * 1.05
+    p = figure(x_range=(0, xmax), y_range=labels, sizing_mode='stretch_both', toolbar_location=None, tools=['tap'], plot_height=180)
+    p.xaxis.formatter = FuncTickFormatter(code='return tick? tick : "";')
     p.yaxis.visible = False
     p.min_border_left = 0
     p.min_border_right = 0
     p.min_border_top = 0
     p.min_border_bottom = 0
-    cmap = glasbey[:]#[8:] + glasbey[:8]
-    if len(cmap) < len(labels):
-        cmap = cmap * (len(labels)//len(cmap)+1)
-    cmap = cmap[2:] + cmap[:2]
+    p.ygrid.grid_line_color = None
+    colors = [('#87cded', '#a7edfd'), ('#c0c610', '#d0ff14'), ('#ff7034', '#ff9044'), ('#ff9889', '#ffb8a9'), ('#f4bfff', '#f8dfff')]
+    cmap = colors[col_index%len(colors)] * int(len(labels)/2+1)
     cmap = cmap[:len(labels)][::-1]
-    ds = ColumnDataSource(dict(labels=labels, value=[v for k,v in data], color=cmap))
+    ds = ColumnDataSource(dict(labels=labels, value=values, color=cmap))
     p.hbar(y='labels', right='value', height=0.9, color='color', source=ds)
     p.text(y='labels', text='labels', text_baseline='middle', x=0, x_offset=3, text_font_size='9px', source=ds)
     ds.selected.js_on_change(
