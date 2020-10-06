@@ -115,12 +115,12 @@ def create_main_plot(docs, dsource, area):
     df['t'] = pd.to_datetime(df.t)
 
     # create main plot
-    main_title = '%i published %s %s articles' % (len(docs), area, dsource)
+    main_title = '%i %s %s articles' % (len(docs), area, dsource)
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
         main_title += ' (FILTERED BY %s)' % sargs
-    p = create_date_plot(main_title, df)
-    return json_item(p)
+    p = create_date_plot(df)
+    return {'name':main_title, 'plot':json_item(p)}
 
 
 def create_annotation_plots(docs, limit):
@@ -164,10 +164,10 @@ def articlify(docs):
     return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 
-def create_date_plot(title, df):
+def create_date_plot(df):
     x0,x1 = x_rng_percentile(df, 1)
     ymax = df.n.max() * 1.05
-    p = figure(title=title, x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
     p.toolbar.logo = None
     zoom = WheelZoomTool(dimensions='width')
     p.add_tools(zoom)

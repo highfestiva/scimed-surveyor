@@ -7,14 +7,20 @@
 </head>
 <body>
   <div class="inline main-chart">
-    <div id="main-plot">
+    <div class="flex-outer">
+      <div class="main-title">
+      </div>
+      <div class="main-holder flex-inner">
+        <div id="main-plot">
+        </div>
+      </div>
     </div>
   </div>
   <div class="inline sub-annotations-top">
-    <div class="sub-annotation-flex">
+    <div class="flex-outer">
       <div class="sub-annotation-top-banner">
       </div>
-      <div class="sub-annotations">
+      <div class="sub-annotations flex-inner">
       </div>
     </div>
   </div>
@@ -25,7 +31,9 @@
   <script>
     var url = '{{area}}/plot-main' + window.location.search;
     $.getJSON(url).done(function(data) {
-      Bokeh.embed.embed_item(data["main"], "main-plot");
+      main = data["main"];
+      $(".main-title").text(main['name']);
+      Bokeh.embed.embed_item(main['plot'], "main-plot");
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
         var annotation = v["name"];

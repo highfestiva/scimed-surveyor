@@ -19,25 +19,31 @@ html, body {
 .main-chart {
 	width: 60%;
 	height: 70%;
-	margin: 0 2%;
+	margin: 1% 2%;
 	vertical-align: top;
+}
+.main-title {
+    padding-left: 1.6em;
+}
+.main-holder {
+	height: 100%;
 }
 .sub-annotations-top {
 	width: 30%;
 	height: 70%;
-	margin: 0 2%;
+	margin: 1% 2%;
 	vertical-align: top;
 }
-.sub-annotation-flex {
+.flex-outer {
 	height: 100%;
 	display: flex;
 	flex-flow: column;
 }
-.sub-annotation-top-banner {
-	height: 1em;
-}
-.sub-annotations {
+.flex-inner {
 	flex: 1 1 auto;
+}
+.sub-annotation-top-banner {
+	height: 0.5em;
 }
 .annotation {
 	height: 20%;

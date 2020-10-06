@@ -3,7 +3,8 @@
 +Synonymer - MESH f. sjukdomar + annat för gener, osv.
 +Plocka bort species
 
-Lägg huvudplot-titel separat
+VGR-logga
++Lägg huvudplot-titel separat
 +Smeta mer i tidsaxelgrafen
 +Bort med Bokeh-loggan
 +Grönfärgen
@@ -13,8 +14,10 @@ Lägg huvudplot-titel separat
 +#Article - table header
 +Marginaler
 +Reducera linjer
+Responsive design
 Dialogruta
 
+Skript för att hämta data
 Docker
 Linuxmaskin
 Cardiac failure
