@@ -3,7 +3,7 @@
 +Synonymer - MESH f. sjukdomar + annat för gener, osv.
 +Plocka bort species
 
-VGR-logga
++VGR-logga
 +Lägg huvudplot-titel separat
 +Smeta mer i tidsaxelgrafen
 +Bort med Bokeh-loggan
@@ -16,6 +16,7 @@ VGR-logga
 +Reducera linjer
 +Responsive design
 Dialogruta
+Firefox + Edge-kompatibilitet
 
 Skript för att hämta data
 Docker
