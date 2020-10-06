@@ -48,7 +48,7 @@ def page_annotation(dsource, area, annotation):
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
-    main_plot = create_main_plot(docs, area)
+    main_plot = create_main_plot(docs, dsource, area)
     plots = create_annotation_plots(docs, limit=8)
     articles = articlify(docs)
     return jsonify({'main':main_plot, 'annotations':plots, 'articles':articles[:50]})
@@ -100,7 +100,7 @@ def sum_annotations(docs, only_annotation):
     return annotations
 
 
-def create_main_plot(docs, area):
+def create_main_plot(docs, dsource, area):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
@@ -110,7 +110,7 @@ def create_main_plot(docs, area):
     y = [cnt for t,cnt in series]
 
     # create main plot
-    main_title = '%i published pubtator %s articles' % (len(docs), area)
+    main_title = '%i published %s %s articles' % (len(docs), area, dsource)
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
         main_title += ' (FILTERED BY %s)' % sargs
