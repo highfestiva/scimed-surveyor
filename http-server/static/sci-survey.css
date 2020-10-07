@@ -10,7 +10,6 @@ html, body {
 	height: 70%;
 	display: flex;
 	flex-flow: column;
-	z-index: -1;
 }
 .vgr-background {
 	background: #005c95;
@@ -29,25 +28,30 @@ html, body {
 	transform: rotate(-90deg);
 	filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 	width: 500px;
-    position: absolute;
-    bottom: 70px;
-    left: 0.7vw;
-    font-size: 1.5vw;
+	position: absolute;
+	bottom: 70px;
+	left: calc(4px + 0.5vw);
+	font-size: 1.8vw;
 }
 
 .inline {
 	display: inline-block;
 }
+.page-reset {
+	cursor: pointer;
+}
 .main-chart {
+	position: relative;
 	width: 58%;
 	height: 70%;
 	vertical-align: top;
-    margin: 0 2% 0 3%;
-    padding: 1% 0;
-    background: #fff;
+	margin: 0 2% 0 5%;
+	padding: 1% 0;
+	background: #fff;
+	z-index: 2;
 }
 .main-title {
-    padding-left: 1.6em;
+	padding-left: 1.6em;
 }
 .main-holder {
 	height: 100%;
@@ -105,9 +109,6 @@ table.articles td {
 .line-no, .occurances {
 	text-align: right;
 }
-.occurances {
-	padding-right: 5em;
-}
 .header {
 	color: #000;
 }
@@ -122,12 +123,46 @@ table a:hover {
 	color: #444;
 }
 
+.dialog-overlay {
+	background: #000000dd;
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 10;
+}
+.annotation-dialog {
+	background: #fff;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 40%;
+	height: 70%;
+	min-width: 30em;
+	min-height: 20em;
+	border: 3px solid #000;
+	z-index: 100;
+}
+.annotation-dialog-title {
+	margin: 0;
+	padding: 1em;
+	background: #ccc;
+}
 table.labels {
-	margin-bottom: 5em;
-	max-height: 60%;
+	margin: 2em;
+	max-height: 70%;
 	overflow-y: scroll;
 	display: inline-block;
-	border-bottom: 1px solid #ddd;
+	border: 1px solid #ccc;
+}
+.label {
+	width: 70%;
+	word-break: break-word;
+}
+.occurances {
+	padding-right: 1em;
 }
 
 

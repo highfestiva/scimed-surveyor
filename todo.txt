@@ -15,12 +15,12 @@
 +Marginaler
 +Reducera linjer
 +Responsive design
-Dialogruta
-Firefox + Edge-kompatibilitet
++Dialog istf. egen sida för annotationerna
++Firefox + Edge-kompatibilitet
 
 Skript för att hämta data
 Docker
 Linuxmaskin
 Cardiac failure
-Dialog istf. egen sida för annotationerna
 Twitter
+Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.

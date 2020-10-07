@@ -6,11 +6,11 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="vgr-logo-container">
-    <div class="vgr-background">
+  <div class="vgr-logo-container page-reset">
+    <div class="vgr-background page-reset">
     </div>
-    <div class="vgr-logo">
-      <div class="vgr-name">Sci-Med Surveyor</div>
+    <div class="vgr-logo page-reset">
+      <div class="vgr-name page-reset">Sci-Med Surveyor</div>
     </div>
   </div>
   <div class="inline main-chart">
@@ -35,6 +35,13 @@
     <table class="articles">
     </table>
   </div>
+  <div style="display:None" class="dialog-overlay">
+    <div class="annotation-dialog">
+      <p class="annotation-dialog-title"></p>
+      <table class="annotation-dialog-table labels">
+      </table>
+    </div>
+  </div>
   <script>
     var url = '{{area}}/plot-main' + window.location.search;
     $.getJSON(url).done(function(data) {
@@ -46,22 +53,45 @@
         var annotation = v["name"];
         var annotationUrl = annotation + window.location.search;
         $(".sub-annotations").append('<div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
-        // open annotation dialog
-        $(".annotation-link").click(function(ev) {
-          ev.preventDefault();
-          $.getJSON($(this).attr("href")).done(function(data) {
-            $(".annotation-dialog").text(data);
+        Bokeh.embed.embed_item(v["plot"], cId);
+      });
+      // open annotation dialog
+      $(".annotation-link").click(function(ev) {
+        ev.preventDefault();
+        $(".annotation-dialog-title").text("Loading...");
+        $(".annotation-dialog-table").html("");
+        $(".dialog-overlay").attr("style", "");
+        var annotation = $(this).text();
+        $.getJSON($(this).attr("href")).done(function(data) {
+          data['annotations'].map(function(v, i) {
+            $(".annotation-dialog-title").text(v["fullname"]);
+            var html = "";
+            v["labels"].map(function(w) {
+              html += '<tr><td class="label"><a href="?'+v["name"]+'='+w[0]+'">' + w[0] + '</a></td><td class="occurances">' + w[1] + '</td></tr>';
+            });
+            $(".annotation-dialog-table").html(html);
+            $(".annotation-dialog-table a").click(function(ev) {
+              ev.preventDefault();
+              var url = new URL(window.location.href);
+              var val = url.searchParams.get(annotation);
+              val = (val? val+"," : "") + $(this).text();
+              url.searchParams.set(annotation, val);
+              window.location.assign(url);
+            });
           });
         });
-        Bokeh.embed.embed_item(v["plot"], cId);
       });
       $(".articles").append('<tr><td class="line-no header">#</td><td class="header">Articles</td></tr>');
       data['articles'].map(function(v, i) {
         $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
       });
     });
+    $(".page-reset").click(function() {
+      window.location.assign("{{area}}");
+    });
+    $(".dialog-overlay").click(function() {
+      $(".dialog-overlay").attr("style", "display:None");
+    });
   </script>
-  <div style="display:None" class="annotation-dialog">
-  </div>
 </body>
 <html>
