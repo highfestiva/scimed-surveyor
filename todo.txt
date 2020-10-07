@@ -18,7 +18,7 @@
 +Dialog istf. egen sida för annotationerna
 +Firefox + Edge-kompatibilitet
 
-Skript för att hämta data
++Skript för att hämta data
 Docker
 Linuxmaskin
 Cardiac failure

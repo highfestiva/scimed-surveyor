@@ -100,12 +100,14 @@ for line in open('data/litcovid2pubtator.json'):
         if len(articles) == 5000:
             break
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-
 def save(article):
     # print(article)
     res = es.index(index='pubtator-covid-19', body=article)
     # print(res['_id'])
+
+print('deleting index')
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+es.indices.delete(index='pubtator-covid-19', ignore=[400, 404])
 
 print('saving...')
 for i,article in enumerate(articles):
