@@ -8,17 +8,17 @@ from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
 from bokeh.palettes import cividis, Category20
 from bokeh.plotting import figure
 import calendar
-from colorcet import glasbey
 from collections import defaultdict
 from copy import deepcopy
 from dateutil import parser as date_parser
 from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
+from os import getenv
 import pandas as pd
 
 
 chunk_hits = 10000
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+es = Elasticsearch([{'host': getenv('ESHOST', 'localhost'), 'port': 9200}])
 app = Flask(__name__)
 
 es_query = {
@@ -223,4 +223,5 @@ def create_annotation_hbar(annotation, data, col_index=0):
     return p
 
 
+assert es.ping()
 app.run(host='0.0.0.0', port=8080)
