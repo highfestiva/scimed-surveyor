@@ -48,7 +48,7 @@ def plot_main(dsource, area):
     main_plot = create_main_plot(docs, dsource, area)
     plots = create_annotation_plots(docs, limit=7)
     articles = articlify(docs)
-    return jsonify({'main':main_plot, 'annotations':plots, 'articles':articles[:50]})
+    return jsonify({'main':main_plot, 'annotations':plots, 'article-header':'Latest articles'+main_plot['filter-suffix'], 'articles':articles[:50]})
 
 
 @app.route('/<dsource>/<area>/list-labels/<annotation>')
@@ -108,11 +108,13 @@ def create_main_plot(docs, dsource, area):
 
     # create main plot
     main_title = '%i %s %s articles' % (len(docs), area, dsource)
+    filter_suffix = ''
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
-        main_title += ' (FILTERED BY %s)' % sargs
+        filter_suffix = ' (FILTERED BY %s)' % sargs
+        main_title += filter_suffix
     p = create_date_plot(df)
-    return {'name':main_title, 'plot':json_item(p)}
+    return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':json_item(p)}
 
 
 def create_annotation_plots(docs, limit):

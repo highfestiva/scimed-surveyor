@@ -83,7 +83,7 @@ html, body {
 }
 .annotation > p {
 	margin: 0;
-	font-size: 12px;
+		: 12px;
 	color: #616161;
 }
 .main-annotations {
@@ -111,6 +111,10 @@ table.articles td {
 }
 .header {
 	color: #000;
+}
+
+.bk {
+    cursor: pointer;
 }
 
 table a:link, table a:visited {
@@ -166,7 +170,9 @@ table.labels {
 }
 
 
-@media only screen and (max-width: 700px), (max-height: 750px) {
+@media 	only screen and (max-width: 700px),
+		only screen and (max-height: 750px),
+		only screen and (min-resolution: 2dppx) {
 
 .main-chart {
 	width: 95%;
@@ -183,6 +189,24 @@ table.labels {
 	width: 46%;
 	height: 30%;
 	margin: 2%;
+}
+
+}
+
+@media only screen and (min-resolution: 2dppx) {
+
+body {
+	font-size: 1.2em;
+}
+.vgr-logo-container, .main-chart {
+	height: 50%;
+}
+table.articles td {
+	font-size: 1em;
+}
+.annotation-dialog {
+	width: 100%;
+	min-width: 100%;
 }
 
 }

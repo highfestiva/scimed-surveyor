@@ -19,9 +19,11 @@
 +Firefox + Edge-kompatibilitet
 
 +Skript för att hämta data
-Docker
-Linuxmaskin
++Docker
++Linuxmaskin
 
++Kompatibilitet med smart phones, tablets, etc.
+Produktionsdeploy av Flask
 Fixa caching.
 Separera JS eller hålla lätt att maint:a?
 
