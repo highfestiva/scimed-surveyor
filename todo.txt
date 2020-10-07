@@ -21,6 +21,11 @@
 +Skript för att hämta data
 Docker
 Linuxmaskin
+
+Fixa caching.
+Separera JS eller hålla lätt att maint:a?
+
 Cardiac failure
 Twitter
 Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
+Kolla hur vi gör med github/annat?
