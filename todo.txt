@@ -27,7 +27,7 @@ Produktionsdeploy av Flask
 Fixa caching.
 Separera JS eller hålla lätt att maint:a?
 
-Cardiac failure
-Twitter
+Pubtator: cardiac failure
+Twitter: ???
 Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
 Kolla hur vi gör med github/annat?
