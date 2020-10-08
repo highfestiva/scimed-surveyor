@@ -48,6 +48,12 @@
     $.getJSON(url).done(function(data) {
       main = data["main"];
       $(".main-title").text(main['name']);
+      if (main['filter-suffix']) {
+        $(".main-title").append(' <span class="close-filter page-reset">X</span>');
+      }
+      $(".page-reset").click(function() {
+        window.location.assign("{{area}}");
+      });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
@@ -86,9 +92,6 @@
       data['articles'].map(function(v, i) {
         $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
       });
-    });
-    $(".page-reset").click(function() {
-      window.location.assign("{{area}}");
     });
     $(".dialog-overlay").click(function() {
       $(".dialog-overlay").attr("style", "display:None");

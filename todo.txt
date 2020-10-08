@@ -26,12 +26,15 @@ Pubtator: cardiac failure (först pubmed API som genererar pmid-lista som sedan 
 Twitter: ???
 Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
 
-Access till Kibana och Elastic
-Länk ut till pubtator istället för pubmed?
-Länka ut till ny websida
++Access till Kibana och Elastic
+ - Lade till /elastic och /kibana i reverse proxy
++Länk ut till pubtator istället för pubmed?
+
+?Länka ut till ny websida
+
 Länkar för Gene, Chemical och disease
 Filter på datum (slider?)
-REset-knapp/länk
++REset-knapp/länk
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc
 Synonymer är fixat? Kanske bra att ha konsekvent namngivning, dvs hämta namn från en lookup på id
 Få in ontologier/hierarkier (gene ontology, mesh (för chem och disease)

@@ -156,7 +156,7 @@ def smear_partial_dates(data):
 def articlify(docs):
     articles = []
     for doc in docs:
-        articles.append({'title':doc['title'], 'date':doc['date'], 'url':'https://pubmed.ncbi.nlm.nih.gov/%s/'%doc['id']})
+        articles.append({'title':doc['title'], 'date':doc['date'], 'url':'https://www.ncbi.nlm.nih.gov/research/pubtator/?pmid=%s'%doc['id']})
     return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 

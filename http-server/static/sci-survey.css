@@ -53,6 +53,16 @@ html, body {
 .main-title {
 	padding-left: 1.6em;
 }
+span.close-filter {
+    color: #fff;
+    background: #a00;
+    font-size: 70%;
+    padding: 0.2em 0.5em;
+    border-radius: 0.3em;
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+}
 .main-holder {
 	height: 100%;
 }
