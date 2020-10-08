@@ -10,3 +10,4 @@ ADD static/ /usr/local/static/
 WORKDIR /usr/local
 ENV ESHOST=elastic
 CMD ["./http-server.py"]
+#CMD ["/bin/bash"]

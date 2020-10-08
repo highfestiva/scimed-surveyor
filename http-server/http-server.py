@@ -227,5 +227,13 @@ def create_annotation_hbar(annotation, data, col_index=0):
     return p
 
 
+# wait for Elasticsearch
+for _ in range(30):
+    if es.ping():
+        break
+    import time
+    time.sleep(1)
 assert es.ping()
+
+
 app.run(host='0.0.0.0', port=8080)

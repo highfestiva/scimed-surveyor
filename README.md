@@ -6,10 +6,10 @@ articles are indexed in this first version.
 
 ## Get started
 
-* Start Elasticsearch: `elasticsearch/run-elasticsearch-docker.sh`
+* Build web server: `docker-compose build`
+* Start Elasticsearch, nginx and web server: `docker-compose up -d`
 * Download data: `./download-data-pubtator-covid-19.sh`
-* Save into Elasticsearch: `./load-pubtator-covid-19-into-es.py`
-* Run web server: `cd http-server && ./build-and-run-docker.sh`
+* Save into Elasticsearch's DB: `./load-pubtator-covid-19-into-es.py`
 * Open browser towards localhost:8080/pubtator/covid-19
 
 
@@ -28,6 +28,5 @@ Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the cha
 
 ## [Docker](https://www.docker.com/) setup
 
-Elasticsearch is started in a [network](https://docs.docker.com/network/) called `backend`. It's network alias
-is set to `elastic`. When `http-server.py` is started, it looks at the environment variable `ESHOST` to
-determine the hostname of the Elasticsearch server. If `ESHOST` is not set, it uses `localhost`.
+[docker-compose](https://docs.docker.com/compose/) is used to start Elasticsearch, Kibana, the web server,
+the reverse proxy (nginx), etc. Kibana is mapped in under /kibana/.

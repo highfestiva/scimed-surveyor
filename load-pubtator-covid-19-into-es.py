@@ -30,7 +30,7 @@ def datefmt(unit, maxval):
 print('loading mesh files...')
 id2shortname = {}
 for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin','SH = ')]:
-    for line in open('data/'+fname, encoding='utf8'):
+    for line in open('download-data/'+fname, encoding='utf8'):
         if line.startswith(term_id):
             term = line.partition(' = ')[2].strip()
         elif line.startswith('UI ='):
@@ -41,7 +41,7 @@ for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin',
 # create a gene dict based on prevalence
 gene2word2cnt = defaultdict(lambda: defaultdict(int))
 print('checking gene prevalence...')
-for i,line in enumerate(open('data/litcovid2pubtator.json')):
+for i,line in enumerate(open('download-data/litcovid2pubtator.json')):
     if '"_id": ' in line[:15]:
         if i%11:
             print('%i'%i, end='\r')
@@ -60,7 +60,7 @@ for gid,word2cnt in gene2word2cnt.items():
 
 print('loading data...')
 articles = []
-for line in open('data/litcovid2pubtator.json'):
+for line in open('download-data/litcovid2pubtator.json'):
     if '"_id": ' in line[:15]:
         # print('---------------------')
         line = loads(line[1:])
