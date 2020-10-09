@@ -33,6 +33,8 @@ Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
 ?Länka ut till ny websida
 
 Länkar för Gene, Chemical och disease
+Fixa cellline -> "cell line"
+Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
 Filter på datum (slider?)
 +REset-knapp/länk
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc

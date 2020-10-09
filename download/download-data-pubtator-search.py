@@ -38,4 +38,4 @@ for i in range(0, len(articles), chunk_cnt):
         print(','+line, file=w) # prefix with comma for ES loader
         saved_cnt += 1
 print()
-print('saved articles:', saved_cnt)
+print('saved pubtator articles:', saved_cnt)
