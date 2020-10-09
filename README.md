@@ -8,8 +8,8 @@ articles are indexed in this first version.
 
 * Build web server: `docker-compose build`
 * Start Elasticsearch, nginx and web server: `docker-compose up -d`
-* Download data: `./download-data-pubtator-covid-19.sh`
-* Save into Elasticsearch's DB: `./load-pubtator-covid-19-into-es.py`
+* Download data: `cd download; ./download-data-pubtator-covid-19.sh`
+* Save into Elasticsearch's DB: `cd download; ./load-pubtator-into-es.py --index pubtator-covid-19 --file data/litcovid2pubtator.json`
 * Open browser towards localhost:8080/pubtator/covid-19
 
 

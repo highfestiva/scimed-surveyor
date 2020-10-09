@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 
+import argparse
 from collections import defaultdict
 from elasticsearch import Elasticsearch
 from json import loads
 import re
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--index', required=True, help='index to insert into, e.g. "pubtator-covid-19"')
+parser.add_argument('file', help='JSON file containing pubtator data')
+options = parser.parse_args()
+
 
 journal_split_regexp = re.compile(r'[\.;,]')
 date_match = re.compile(r'(19\d\d|20\d\d)')
@@ -30,7 +38,7 @@ def datefmt(unit, maxval):
 print('loading mesh files...')
 id2shortname = {}
 for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin','SH = ')]:
-    for line in open('download-data/'+fname, encoding='utf8'):
+    for line in open('data/'+fname, encoding='utf8'):
         if line.startswith(term_id):
             term = line.partition(' = ')[2].strip()
         elif line.startswith('UI ='):
@@ -41,7 +49,7 @@ for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin',
 # create a gene dict based on prevalence
 gene2word2cnt = defaultdict(lambda: defaultdict(int))
 print('checking gene prevalence...')
-for i,line in enumerate(open('download-data/litcovid2pubtator.json')):
+for i,line in enumerate(open(options.file)):
     if '"_id": ' in line[:15]:
         if i%11:
             print('%i'%i, end='\r')
@@ -60,7 +68,7 @@ for gid,word2cnt in gene2word2cnt.items():
 
 print('loading data...')
 articles = []
-for line in open('download-data/litcovid2pubtator.json'):
+for line in open(options.file):
     if '"_id": ' in line[:15]:
         # print('---------------------')
         line = loads(line[1:])
@@ -102,12 +110,12 @@ for line in open('download-data/litcovid2pubtator.json'):
 
 def save(article):
     # print(article)
-    res = es.index(index='pubtator-covid-19', body=article)
+    res = es.index(index=options.index, body=article)
     # print(res['_id'])
 
-print('deleting index')
+print('deleting index', options.index)
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-es.indices.delete(index='pubtator-covid-19', ignore=[400, 404])
+es.indices.delete(index=options.index, ignore=[400, 404])
 
 print('saving...')
 for i,article in enumerate(articles):
