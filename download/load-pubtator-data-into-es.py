@@ -9,6 +9,7 @@ import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--index', required=True, help='index to insert into, e.g. "pubtator-covid-19"')
+parser.add_argument('--limit', default=100_000, type=int, help='number or articles to insert into Elasticsearch')
 parser.add_argument('file', help='JSON file containing pubtator data')
 options = parser.parse_args()
 
@@ -51,7 +52,7 @@ gene2word2cnt = defaultdict(lambda: defaultdict(int))
 print('checking gene prevalence...')
 for i,line in enumerate(open(options.file)):
     if '"_id": ' in line[:15]:
-        if i%11:
+        if i%23:
             print('%i'%i, end='\r')
         line = loads(line[1:])
         for passage in line['passages']:
@@ -105,7 +106,7 @@ for line in open(options.file):
         annotations = {k:sorted(v) for k,v in annotations.items()}
         article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
         articles.append(article)
-        if len(articles) == 5000:
+        if len(articles) >= options.limit:
             break
 
 def save(article):
@@ -119,7 +120,7 @@ es.indices.delete(index=options.index, ignore=[400, 404])
 
 print('saving...')
 for i,article in enumerate(articles):
-    if i%11:
+    if i%23:
         print(i, article['date'], '~', article['title'][:50], end='\r')
     save(article)
 

@@ -7,7 +7,7 @@ import requests
 
 parser = argparse.ArgumentParser()
 parser.add_argument('search', nargs='+', help='search term, e.g. "cardiac failure"')
-parser.add_argument('--limit', default=1000, type=int, help='number or articles to initially fetch')
+parser.add_argument('--limit', default=1000, type=int, help='number or articles to fetch from pubmed')
 options = parser.parse_args()
 
 
