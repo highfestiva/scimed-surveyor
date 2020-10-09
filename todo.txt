@@ -21,14 +21,18 @@
 +Skript för att hämta data
 +Docker
 +Linuxmaskin
-
-Pubtator: cardiac failure (först pubmed API som genererar pmid-lista som sedan kan skickas till pubtator)
-Twitter: ???
-Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
++Kompatibilitet med smart phones, tablets, etc.
 
 +Access till Kibana och Elastic
- - Lade till /elastic och /kibana i reverse proxy
+ + Lade till /elastic och /kibana i reverse proxy
 +Länk ut till pubtator istället för pubmed?
++Reset-knapp/länk
+
++Pubtator: cardiac failure (först pubmed API som genererar pmid-lista som sedan kan skickas till pubtator)
+Twitter
+Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
+
+Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
 
 ?Länka ut till ny websida
 
@@ -36,14 +40,10 @@ Länkar för Gene, Chemical och disease
 Fixa cellline -> "cell line"
 Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
 Filter på datum (slider?)
-+REset-knapp/länk
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc
 Synonymer är fixat? Kanske bra att ha konsekvent namngivning, dvs hämta namn från en lookup på id
 Få in ontologier/hierarkier (gene ontology, mesh (för chem och disease)
-Twitter
-Hitta andra entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 
-+Kompatibilitet med smart phones, tablets, etc.
 Produktionsdeploy av Flask
 Fixa caching.
 Separera JS eller hålla lätt att maint:a?

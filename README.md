@@ -30,3 +30,29 @@ Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the cha
 
 [docker-compose](https://docs.docker.com/compose/) is used to start Elasticsearch, Kibana, the web server,
 the reverse proxy (nginx), etc. Kibana is mapped in under /kibana/.
+
+
+## Download and insert new PubTator topics
+
+To get new a PubTator topic shown in the web server you need to do two things:
+
+1. Download PubTator articles
+2. Insert the downloaded articles into Elasticsearch
+
+To download you move to the directory `./download/` and run for instance:
+
+````bash
+$ ./download-data-pubtator-search.py --limit 10000 prostate cancer
+````
+
+That script will save the 10,000 results into `download/data/prostate+cancer.json`. Normally the number of
+results will be slightly less than 10,000, as not all PubMed articles are absorbed by PubTator.
+
+To install those downloaded articles, run:
+
+````bash
+$ ./load-pubtator-data-into-es.py --index pubtator-prostate-cancer data/prostate+cancer.json
+````
+
+Approximate throughput of download is 170 articles/s. Elasticsearch insert throughput is approximately 570
+articles/s. Go to http://host:port/pubtator/prostate-cancer to see the new topic.
