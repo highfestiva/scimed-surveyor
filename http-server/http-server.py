@@ -19,6 +19,7 @@ import pandas as pd
 
 chunk_hits = 10000
 eshost = getenv('ESHOST', 'localhost')
+version = getenv('SCIMEDVER', 'v0.1')
 es = Elasticsearch([{'host': eshost, 'port': 9200}])
 app = Flask(__name__)
 
@@ -40,7 +41,7 @@ def favicon():
 
 @app.route('/<dsource>/<area>')
 def page_main(dsource, area):
-    return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area)
+    return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)
 
 
 @app.route('/<dsource>/<area>/plot-main')
