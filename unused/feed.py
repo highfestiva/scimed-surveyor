@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 
+from pprint import pprint
 import requests
 
 
-api_key = 'rY81K2dUBkhqZU5BVWFEDtSKq'
-api_secret = 'B3gK5ndNu4NHcjsgl9sTIZPy7xMWo8TfkNsEIdALY3LYCGzyUk'
-bearer_token = 'AAAAAAAAAAAAAAAAAAAAAIoNHwEAAAAAGkPYnxky2SF6Hw0bjgGPefcDB6A%3DDHMd9NjSMYuGtbtRVD3o8XJJcsf32v9ZBsUSSCEVFjVu0qO3LQ'
+api_key = ''
+api_secret = ''
+bearer_token = ''
 
 
-search = '%23COVID'
-r = requests.get('https://api.twitter.com/2/tweets/search/recent?query='+search, headers={'Authorization': 'Bearer '+bearer_token}).json()
+search = 'ai (medicine OR healthcare)'
+fields = 'tweet.fields=geo,created_at'
+start_time = '2020-10-12T12:00:00Z'
+end_time   = '2020-10-12T13:00:01Z'
+limit = 100
+url = 'https://api.twitter.com/2/tweets/search/recent?%s&start_time=%s&end_time=%s&max_results=%s&query=%s' % (fields, start_time, end_time, limit, search)
+r = requests.get(url, headers={'Authorization': 'Bearer '+bearer_token}).json()
 for tweet in r['data']:
-    print(tweet['text'])
+    pprint(tweet)

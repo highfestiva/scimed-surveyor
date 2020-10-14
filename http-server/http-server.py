@@ -49,8 +49,8 @@ def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
     main_plot = create_main_plot(docs, dsource, area)
-    plots = create_annotation_plots(docs, limit=7)
-    articles = articlify(docs)
+    plots = create_annotation_plots(docs, limit=7) if dsource=='pubtator' else []
+    articles = articlify(docs) if dsource=='pubtator' else []
     return jsonify({'main':main_plot, 'annotations':plots, 'article-header':'Latest articles'+main_plot['filter-suffix'], 'articles':articles[:50]})
 
 
