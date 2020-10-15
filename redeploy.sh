@@ -1,5 +1,5 @@
 #!/bin/bash
 
-docker-compose build
 export COMMIT=`git rev-parse --short HEAD`
+docker-compose build
 docker-compose up -d
