@@ -88,6 +88,9 @@ span.close-filter {
 	display: flex;
 	flex-flow: column;
 }
+.annotation-hashtag {
+	height: 100%;
+}
 .annotation-chart {
 	flex: 1 1 auto;
 }
@@ -195,10 +198,14 @@ table.labels {
 	height: auto;
 }
 .annotation {
-	display: inline-block;
 	width: 46%;
 	height: 30%;
 	margin: 2%;
+}
+.annotation-hashtag {
+	width: 95%;
+	height: 50%;
+	min-height: 25em;
 }
 
 }

@@ -22,6 +22,8 @@ eshost = getenv('ESHOST', 'localhost')
 version = getenv('SCIMEDVER', 'v0.1')
 es = Elasticsearch([{'host': eshost, 'port': 9200}])
 app = Flask(__name__)
+hour = 60*60*1000
+day = 24*hour
 
 es_query = {
     'query': {
@@ -48,10 +50,13 @@ def page_main(dsource, area):
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
-    main_plot = create_main_plot(docs, dsource, area)
-    plots = create_annotation_plots(docs, limit=7) if dsource=='pubtator' else []
-    articles = articlify(docs) if dsource=='pubtator' else []
-    return jsonify({'main':main_plot, 'annotations':plots, 'article-header':'Latest articles'+main_plot['filter-suffix'], 'articles':articles[:50]})
+    nouns = 'tweets' if dsource=='twitter' else 'articles'
+    sample_t = hour if dsource=='twitter' else day
+    main_plot = create_main_plot(docs, nouns, dsource, area, sample_t=sample_t)
+    plots = create_annotation_plots(docs, limit=40 if dsource=='twitter' else 7)
+    articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
+    annotation_class = 'annotation-hashtag' if dsource=='twitter' else ''
+    return jsonify({'main':main_plot, 'annotations':plots, 'annot_class':annotation_class, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50]})
 
 
 @app.route('/<dsource>/<area>/list-labels/<annotation>')
@@ -76,7 +81,7 @@ def fetch_docs(index, annotations=None):
     kwargs = {}
     if annotations:
         kwargs = {'body': deepcopy(es_query)}
-        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv}} for k,v in annotations.items() for vv in v.split(',')]
+        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv.strip('#')}} for k,v in annotations.items() for vv in v.split(',')]
         print(kwargs)
     docs = []
     r = es.search(index=index, size=chunk_hits, scroll='2s', **kwargs)
@@ -101,7 +106,7 @@ def sum_annotations(docs, only_annotation):
     return annotations
 
 
-def create_main_plot(docs, dsource, area):
+def create_main_plot(docs, nouns, dsource, area, sample_t):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
@@ -110,13 +115,14 @@ def create_main_plot(docs, dsource, area):
     df['t'] = pd.to_datetime(df.t)
 
     # create main plot
-    main_title = '%i %s %s articles' % (len(docs), area, dsource)
+    dsourcename = '' if nouns=='tweets' else dsource
+    main_title = '%i %s %s %s' % (len(docs), area, dsourcename, nouns)
     filter_suffix = ''
     if request.args:
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
         filter_suffix = ' (FILTERED BY %s)' % sargs
         main_title += filter_suffix
-    p = create_date_plot(df)
+    p = create_date_plot(dsource, df, sample_t)
     return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':json_item(p)}
 
 
@@ -154,6 +160,13 @@ def smear_partial_dates(data):
             del data[date]
 
 
+def tweetify(docs):
+    tweets = []
+    for doc in docs:
+        tweets.append({'title':doc['text'], 'date':doc['created_at'], 'url':'https://twitter.com/i/web/status/%s'%doc['id']})
+    return sorted(tweets, key=lambda a: a['date'], reverse=True)
+
+
 def articlify(docs):
     articles = []
     for doc in docs:
@@ -161,8 +174,8 @@ def articlify(docs):
     return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 
-def create_date_plot(df):
-    x0,x1 = x_rng_percentile(df, 1)
+def create_date_plot(dsource, df, sample_t):
+    x0,x1 = x_rng_percentile(dsource, df, 1)
     ymax = df.n.max() * 1.05
     p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
     p.toolbar.logo = None
@@ -178,13 +191,17 @@ def create_date_plot(df):
     dtf.years = ['%F']
     p.xaxis.formatter = dtf
     p.xgrid.grid_line_color = None
-    p.vbar(x=df.t, top=df.n, width=24*60*60*1000, color='#ccffcc')
-    smooth = df.n.rolling(14, center=True).mean()
-    p.line(x=df.t, y=smooth, color='#005500')
+    p.vbar(x=df.t, top=df.n, width=sample_t, color='#ccffcc')
+    if len(df) > 50:
+        smooth = df.n.rolling(14, center=True).mean()
+        p.line(x=df.t, y=smooth, color='#005500')
     return p
 
 
-def x_rng_percentile(df, pct):
+def x_rng_percentile(dsource, df, pct):
+    # twitter assumed to have linear time distribution (while articles don't)
+    if dsource=='twitter' or len(df) < 20:
+        return df['t'].iloc[0], df['t'].iloc[-1]
     '''Drop first and last n percentiles. Return x0, x1.'''
     s = df.n.sum()
     cs = df.n.fillna(0).cumsum()

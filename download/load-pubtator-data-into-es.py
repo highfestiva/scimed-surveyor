@@ -52,7 +52,7 @@ gene2word2cnt = defaultdict(lambda: defaultdict(int))
 print('checking gene prevalence...')
 for i,line in enumerate(open(options.file)):
     if '"_id": ' in line[:15]:
-        if i%23:
+        if i%23 == 0:
             print('%i'%i, end='\r')
         line = loads(line[1:])
         for passage in line['passages']:
@@ -120,7 +120,7 @@ es.indices.delete(index=options.index, ignore=[400, 404])
 
 print('saving...')
 for i,article in enumerate(articles):
-    if i%23:
+    if i%23 == 0:
         print(i, article['date'], '~', article['title'][:50], end='\r')
     save(article)
 

@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>{{area}}</title>
+  <title>{{dsource}} {{area}}</title>
   <meta name="viewport" content="initial-scale=1.0">
   <link rel="stylesheet" href="/static/sci-survey.css?{{ssver}}" type="text/css">
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-{{bokeh_version}}.min.js" crossorigin="anonymous"></script>
@@ -55,11 +55,12 @@
         window.location.assign("{{area}}");
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
+      var annotClass = data["annot_class"]
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
         var annotation = v["name"];
         var annotationUrl = annotation + window.location.search;
-        $(".sub-annotations").append('<div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
+        $(".sub-annotations").append('<div class="annotation '+annotClass+'"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       // open annotation dialog
@@ -90,7 +91,7 @@
       });
       $(".articles").append('<tr><td class="line-no header">#</td><td class="header">' + data['article-header'] + '</td></tr>');
       data['articles'].map(function(v, i) {
-        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
+        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'" target="_blank">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
       });
     });
     $(".dialog-overlay").click(function() {
