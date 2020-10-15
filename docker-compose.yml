@@ -13,6 +13,8 @@ services:
     build: http-server
     depends_on:
       - elastic
+    environment:
+      - SCIMEDVER=${COMMIT}
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
