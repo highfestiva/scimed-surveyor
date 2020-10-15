@@ -163,7 +163,7 @@ def smear_partial_dates(data):
 def tweetify(docs):
     tweets = []
     for doc in docs:
-        tweets.append({'title':doc['text'], 'date':doc['created_at'], 'url':'https://twitter.com/i/web/status/%s'%doc['id']})
+        tweets.append({'title':doc['text'], 'date':doc['created_at'].replace('T', ' '), 'url':'https://twitter.com/i/web/status/%s'%doc['id']})
     return sorted(tweets, key=lambda a: a['date'], reverse=True)
 
 
