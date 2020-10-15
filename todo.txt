@@ -29,10 +29,13 @@
 +Reset-knapp/länk
 
 +Pubtator: cardiac failure (först pubmed API som genererar pmid-lista som sedan kan skickas till pubtator)
-Twitter
-Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
++Twitter
 
-Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
++Volym-test: kolla att samtliga 56k artiklar i COVID-19 funkar, t.ex.
++Kolla hur vi gör med github/annat?
++Synonymer är fixat? Kanske bra att ha konsekvent namngivning, dvs hämta namn från en lookup på id
+
+Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 
 ?Länka ut till ny websida
 
@@ -41,7 +44,6 @@ Fixa cellline -> "cell line"
 Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
 Filter på datum (slider?)
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc
-Synonymer är fixat? Kanske bra att ha konsekvent namngivning, dvs hämta namn från en lookup på id
 Få in ontologier/hierarkier (gene ontology, mesh (för chem och disease)
 
 Produktionsdeploy av Flask
@@ -49,4 +51,3 @@ Fixa caching.
 Separera JS eller hålla lätt att maint:a?
 
 Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
-+Kolla hur vi gör med github/annat?
