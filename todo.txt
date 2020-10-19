@@ -35,6 +35,8 @@
 +Kolla hur vi gör med github/annat?
 +Synonymer är fixat? Kanske bra att ha konsekvent namngivning, dvs hämta namn från en lookup på id
 
++Säkra upp databasen med ett lösenord.
+
 Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 
 ?Länka ut till ny websida
