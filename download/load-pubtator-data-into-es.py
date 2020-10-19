@@ -3,6 +3,7 @@
 import argparse
 from collections import defaultdict
 from elasticsearch import Elasticsearch
+from extra_annotations import extra_annotations
 from json import loads
 import re
 
@@ -97,12 +98,21 @@ for line in open(options.file):
                             month = month.replace(k,v)
                         date = year + datefmt(month, 12) + datefmt(day, 31)
                         # print(date, orig_date, title)
+            # add annotations
             pas = passage.get('annotations') or []
             for a in pas:
                 infons = a['infons']
                 lookup = infons.get('identifier')
                 txt = id2shortname.get(lookup)
                 annotations[infons['type'].lower()].add(txt or a['text'].lower())
+            # manual annotations
+            text = passage.get('text')
+            if text:
+                text = text.lower()
+                for topic,values in extra_annotations.items():
+                    for value in values:
+                        if value in text and re.search(r'\b%s\b'%value, text):
+                            annotations[topic].add(value)
         annotations = {k:sorted(v) for k,v in annotations.items()}
         article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
         articles.append(article)

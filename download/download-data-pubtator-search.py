@@ -15,8 +15,9 @@ term = ' '.join(options.search).replace(' ', '+')
 articles = []
 idx = 0
 while idx < options.limit:
-    url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retstart=%i&retmax=1000&term=%s' % (idx, term)
-    print(url, end='\r')
+    limit = 1000 if options.limit>=1000 else options.limit
+    url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retstart=%i&retmax=%s&term=%s' % (idx, limit, term)
+    print(url[:130], end='\r')
     info = requests.get(url).json()
     article_ids = info['esearchresult']['idlist']
     articles += article_ids
@@ -25,7 +26,9 @@ while idx < options.limit:
         break
 print()
 
-w = open('data/%s.json' % term, 'w')
+name = term.replace('"','')
+name = '-'.join(name.split('+')[:5])
+w = open('data/%s.json' % name, 'w')
 chunk_cnt = 90
 saved_cnt = 0
 for i in range(0, len(articles), chunk_cnt):
