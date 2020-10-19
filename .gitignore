@@ -2,3 +2,5 @@ download/data/
 elasticsearch-data/
 __pycache__/
 .twitterkey.py
+http-server/.espassword
+download/.env

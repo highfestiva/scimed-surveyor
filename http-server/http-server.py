@@ -20,7 +20,7 @@ import pandas as pd
 chunk_hits = 10000
 eshost = getenv('ESHOST', 'localhost')
 version = getenv('SCIMEDVER', 'v0.1')
-es = Elasticsearch([{'host': eshost, 'port': 9200}])
+es = Elasticsearch([{'host': eshost, 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
 app = Flask(__name__)
 hour = 60*60*1000
 day = 24*hour

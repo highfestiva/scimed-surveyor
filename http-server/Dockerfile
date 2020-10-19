@@ -4,7 +4,7 @@ RUN pip install --upgrade pip
 RUN pip install flask pandas bokeh
 RUN pip install elasticsearch requests flask-caching
 
-ADD *.py /usr/local/
+ADD *.py .espassword /usr/local/
 ADD templates/ /usr/local/templates/
 ADD static/ /usr/local/static/
 WORKDIR /usr/local

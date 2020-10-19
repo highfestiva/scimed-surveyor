@@ -27,7 +27,7 @@ parser.add_argument('--index', required=True, help='index to insert into, e.g. "
 options = parser.parse_args()
 
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('../http-server/.espassword').read().strip()))
 if options.reset_index:
     print('deleting index', options.index)
     es.indices.delete(index=options.index, ignore=[400, 404])

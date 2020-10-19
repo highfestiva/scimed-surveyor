@@ -24,6 +24,9 @@ services:
       - ./elasticsearch-data:/usr/share/elasticsearch/data
     environment:
       - discovery.type=single-node
+      - xpack.security.enabled=true
+    env_file:
+      - ./elasticsearch-data/.env
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.9.2
