@@ -53,10 +53,10 @@ def plot_main(dsource, area):
     nouns = 'tweets' if dsource=='twitter' else 'articles'
     sample_t = hour if dsource=='twitter' else day
     main_plot = create_main_plot(docs, nouns, dsource, area, sample_t=sample_t)
-    plots = create_annotation_plots(docs, limit=40 if dsource=='twitter' else 7)
+    plots = create_annotation_plots(docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
-    annotation_class = 'annotation-hashtag' if dsource=='twitter' else ''
-    return jsonify({'main':main_plot, 'annotations':plots, 'annot_class':annotation_class, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50]})
+    annotation_suffix = len(plots)
+    return jsonify({'main':main_plot, 'annotations':plots, 'annot_suffix':annotation_suffix, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50]})
 
 
 @app.route('/<dsource>/<area>/list-labels/<annotation>')

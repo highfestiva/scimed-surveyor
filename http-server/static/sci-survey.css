@@ -54,14 +54,14 @@ html, body {
 	padding-left: 1.6em;
 }
 span.close-filter {
-    color: #fff;
-    background: #a00;
-    font-size: 70%;
-    padding: 0.2em 0.5em;
-    border-radius: 0.3em;
-    display: inline-block;
-    font-weight: bold;
-    cursor: pointer;
+	color: #fff;
+	background: #a00;
+	font-size: 70%;
+	padding: 0.2em 0.5em;
+	border-radius: 0.3em;
+	display: inline-block;
+	font-weight: bold;
+	cursor: pointer;
 }
 .main-holder {
 	height: 100%;
@@ -83,8 +83,28 @@ span.close-filter {
 .sub-annotation-top-banner {
 	height: 0.5em;
 }
+.sub-annotations {
+	height: 100%;
+}
+.sub-annotations-1, .sub-annotations-2, .sub-annotations-3 {
+	column-count: 1;
+}
+.sub-annotations-4, .sub-annotations-5, .sub-annotations-6, .sub-annotations-7, .sub-annotations-8 {
+	column-count: 2;
+}
+.sub-annotations-9, .sub-annotations-10, .sub-annotations-11, .sub-annotations-12 {
+	column-count: 3;
+}
+.annotation-layout {
+	display: inline-block;
+	width: 100%;
+}
+.annotation-layout-1 { height: 100%; }
+.annotation-layout-2, .annotation-layout-4 { height: 50%; }
+.annotation-layout-3, .annotation-layout-5, .annotation-layout-6, .annotation-layout-9 { height: 33.333%; }
+.annotation-layout-7, .annotation-layout-8, .annotation-layout-10, .annotation-layout-11, .annotation-layout-12 { height: 25%; }
 .annotation {
-	height: 20%;
+	height: 100%;
 	display: flex;
 	flex-flow: column;
 }
@@ -127,7 +147,7 @@ table.articles td {
 }
 
 .bk {
-    cursor: pointer;
+	cursor: pointer;
 }
 
 table a:link, table a:visited {
@@ -167,12 +187,15 @@ table a:hover {
 	padding: 1em;
 	background: #ccc;
 }
-table.labels {
-	margin: 2em;
-	max-height: 70%;
+.labels {
+	margin: 2%;
+	width: 96%;
+	max-height: 75%;
 	overflow-y: scroll;
-	display: inline-block;
 	border: 1px solid #ccc;
+}
+.annotation-dialog-table {
+	width: 100%;
 }
 .label {
 	width: 70%;
@@ -183,7 +206,7 @@ table.labels {
 }
 
 
-@media 	only screen and (max-width: 700px),
+@media 	only screen and (max-width: 1100px),
 		only screen and (max-height: 750px),
 		only screen and (min-resolution: 2dppx) {
 
@@ -197,20 +220,8 @@ table.labels {
 .sub-annotations-outer {
 	height: auto;
 }
-.annotation {
-	display: inline-block;
-	width: 46%;
-	height: 30%;
-	margin: 2%;
-}
-.annotation-hashtag {
-	display: flex;
-	width: 95%;
-	height: 50%;
-	min-height: 25em;
-}
 .articles-top {
-    margin-top: 1em;
+	margin-top: 1em;
 }
 
 }

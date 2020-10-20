@@ -39,8 +39,10 @@
   <div style="display:None" class="dialog-overlay">
     <div class="annotation-dialog">
       <p class="annotation-dialog-title"></p>
-      <table class="annotation-dialog-table labels">
-      </table>
+      <div class="labels">
+        <table class="annotation-dialog-table">
+        </table>
+      </div>
     </div>
   </div>
   <script>
@@ -55,12 +57,13 @@
         window.location.assign("{{area}}");
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
-      var annotClass = data["annot_class"]
+      var annotSuffix = data["annot_suffix"]
+      $(".sub-annotations").addClass("sub-annotations-"+annotSuffix)
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
         var annotation = v["name"];
         var annotationUrl = annotation + window.location.search;
-        $(".sub-annotations").append('<div class="annotation '+annotClass+'"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div>');
+        $(".sub-annotations").append('<div class="annotation-layout annotation-layout-'+annotSuffix+'"><div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div></div>');
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       // open annotation dialog

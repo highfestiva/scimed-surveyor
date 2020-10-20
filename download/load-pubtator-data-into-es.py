@@ -45,6 +45,7 @@ for fname,term_id in [('c2020.bin', 'NM ='), ('d2020.bin','MH ='), ('q2020.bin',
             term = line.partition(' = ')[2].strip()
         elif line.startswith('UI ='):
             mid = 'MESH:' + line.partition(' = ')[2].strip()
+            assert mid and mid not in id2shortname
             id2shortname[mid] = term
 
 
@@ -61,10 +62,13 @@ for i,line in enumerate(open(options.file)):
             for a in pas:
                 infons = a['infons']
                 if infons['type'] == 'Gene':
-                    gid = infons.get('identifier')
+                    gid = infons['identifier']
+                    if not gid:
+                        gid = a['text']
                     gene2word2cnt[gid][a['text']] += 1
 for gid,word2cnt in gene2word2cnt.items():
     most_common = sorted(word2cnt.items(), key=lambda kv:-kv[1])[0][0]
+    assert gid and gid not in id2shortname
     id2shortname[gid] = most_common
 
 

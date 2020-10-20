@@ -48,7 +48,7 @@ st = utc2timestamp(options.start_time)
 et = utc2timestamp(options.end_time)
 step = sum([int(v)*60**i for i,v in enumerate(reversed(options.stride_time.split(':')))])
 saved_cnt = 0
-w = open('data/twitter.json', 'a')
+w = open('data/twitter.json', 'a+')
 for t in range(st, et+step, step):
     start_time = timestamp2utc(t)
     end_time = timestamp2utc(t+step+1)
