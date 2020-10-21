@@ -37,13 +37,15 @@
 
 +Säkra upp databasen med ett lösenord.
 
-Lägg till medical_list.txt.
-Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
++Lägg till medical_list.txt.
+Använd Spacy för att hitta företagsnamn.
+Bakgrundsuppdatering för Twitter.
 Nätverksgraf?
 Karta?
 
 ?Länka ut till ny websida
 
+Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 Strömma Twitter-data och uppdatera grafen löpande.
 Länkar för Gene, Chemical och disease
 Fixa cellline -> "cell line"

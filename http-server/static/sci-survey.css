@@ -96,7 +96,6 @@ span.close-filter {
 	column-count: 3;
 }
 .annotation-layout {
-	display: inline-block;
 	width: 100%;
 }
 .annotation-layout-1 { height: 100%; }
@@ -215,10 +214,10 @@ table a:hover {
 }
 .sub-annotations-top {
 	width: 93%;
-	height: auto;
+	height: 100%;
 }
 .sub-annotations-outer {
-	height: auto;
+	height: 100%;
 }
 .articles-top {
 	margin-top: 1em;
