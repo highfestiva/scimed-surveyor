@@ -96,6 +96,7 @@ span.close-filter {
 	column-count: 3;
 }
 .annotation-layout {
+	display: inline-block;
 	width: 100%;
 }
 .annotation-layout-1 { height: 100%; }

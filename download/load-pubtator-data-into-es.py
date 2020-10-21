@@ -5,12 +5,14 @@ from collections import defaultdict
 from elasticsearch import Elasticsearch
 from extra_annotations import extra_annotations
 from json import loads
+import organizations
 import re
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--index', required=True, help='index to insert into, e.g. "pubtator-covid-19"')
 parser.add_argument('--limit', default=100_000, type=int, help='number or articles to insert into Elasticsearch')
+parser.add_argument('--tag-organizations', action='store_true', default=False, help='add organization annotations')
 parser.add_argument('file', help='JSON file containing pubtator data')
 options = parser.parse_args()
 
@@ -82,6 +84,7 @@ for line in open(options.file):
         title = ''
         date = orig_date = None
         annotations = defaultdict(set)
+        full_text = ''
         for passage in line['passages']:
             if not title and passage['infons']['type'] in ('front','title'):
                 title = passage['text']
@@ -112,22 +115,30 @@ for line in open(options.file):
             # manual annotations
             text = passage.get('text')
             if text:
+                full_text += text + '.'
                 text = text.lower()
                 for topic,values in extra_annotations.items():
                     for value in values:
                         if value in text and re.search(r'\b%s\b'%value, text):
                             annotations[topic].add(value)
+        if full_text and options.tag_organizations:
+            orgs = organizations.extract(full_text)
+            if orgs:
+                annotations['organization'] = orgs
         annotations = {k:sorted(v) for k,v in annotations.items()}
         article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
         articles.append(article)
         if len(articles) >= options.limit:
             break
+        if len(articles)%11:
+            print('\r%s' % len(articles), end='')
 
 def save(article):
     # print(article)
     res = es.index(index=options.index, body=article)
     # print(res['_id'])
 
+print()
 print('deleting index', options.index)
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('../http-server/.espassword').read().strip()))
 es.indices.delete(index=options.index, ignore=[400, 404])

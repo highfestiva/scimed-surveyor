@@ -5,6 +5,7 @@ from collections import defaultdict
 from elasticsearch import Elasticsearch
 from extra_annotations import extra_annotations
 import json
+import organizations
 import re
 
 
@@ -15,15 +16,15 @@ word2terms = defaultdict(set) # optimization
 
 def read_tweet(text, options):
     tweet = json.loads(text)
-    text = tweet['text'].strip('…').lower()
+    orig_text = tweet['text'].strip('…')
+    text = orig_text.lower()
     tweet['date'] = tweet['created_at'].partition(':')[0] + 'Z'
-    annotations = {'hashtag': list(filter(lambda s:s, [w for w in tag_split.split(text) if w and w[0]=='#']))}
+    annotations = defaultdict(set)
+    annotations.update({'hashtag': list(filter(lambda s:s, [w for w in tag_split.split(text) if w and w[0]=='#']))})
     for topic,terms in extra_annotations.items():
         for term in terms:
             if term in text and re.search(r'\b%s\b'%term, text):
-                if topic not in annotations:
-                    annotations[topic] = []
-                annotations[topic].append(term)
+                annotations[topic].add(term)
     for word in text.split():
         terms = word2terms.get(word, [])
         for term in terms:
@@ -32,12 +33,11 @@ def read_tweet(text, options):
                     term = term.replace('(','\\'+ch)
                 if re.search(r'\b%s\b'%term, text):
                     topic,_,term = term2topic_name[term].partition(':')
-                    if topic not in annotations:
-                        annotations[topic] = []
-                    annotations[topic].append(term)
-                    if 'Tyr' in term:
-                        print('"%s" "%s" %s' % (word, term, annotations))
-    tweet['annotations'] = annotations
+                    annotations[topic].add(term)
+    orgs = organizations.extract(orig_text)
+    if orgs:
+        annotations['organization'] = orgs
+    tweet['annotations'] = {k:sorted(v) for k,v in annotations.items()}
     return tweet
 
 
