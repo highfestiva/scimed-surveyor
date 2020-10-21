@@ -37,10 +37,14 @@
 
 +Säkra upp databasen med ett lösenord.
 
+Lägg till medical_list.txt.
 Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
+Nätverksgraf?
+Karta?
 
 ?Länka ut till ny websida
 
+Strömma Twitter-data och uppdatera grafen löpande.
 Länkar för Gene, Chemical och disease
 Fixa cellline -> "cell line"
 Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
