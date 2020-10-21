@@ -32,7 +32,7 @@ Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the cha
 the reverse proxy (nginx), etc. Kibana is mapped in under /kibana/.
 
 
-## Download and insert new PubTator topics
+## Download and inject new PubTator topics
 
 To get new a PubTator topic shown in the web server you need to do two things:
 
@@ -56,3 +56,27 @@ $ ./load-pubtator-data-into-es.py --index pubtator-prostate-cancer data/prostate
 
 Approximate throughput of download is 170 articles/s. Elasticsearch insert throughput is approximately 570
 articles/s. Go to http://host:port/pubtator/prostate-cancer to see the new topic.
+
+
+## Download and inject new Twitter topics
+
+To get new a Twitter topic shown in the web server you need to do two things:
+
+1. Download tweets
+2. Insert the downloaded tweets into Elasticsearch
+
+To download you move to the directory `./download/` and run for instance:
+
+````bash
+$ ./download-twitter-search.py --start-time "2020-10-15T16:00:00Z" --end-time "2020-10-20T11:00:00Z" --stride-time 30:00 --interval-limit 100 --search "ai (medicine OR healthcare OR ehealth OR telemedicine)"
+````
+
+That script will save the results into `download/data/twitter.json`.
+
+To remove any pre-existing and install those downloaded articles, run:
+
+````bash
+$ ./load-twitter-data-into-es.py --reset-index --index twitter-tech
+````
+
+Go to http://host:port/twitter/tech to see the new topic.
