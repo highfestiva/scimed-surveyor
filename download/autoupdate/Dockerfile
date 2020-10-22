@@ -1,4 +1,9 @@
+Incomplete
+
 FROM python:3.8
+
+RUN pip install --upgrade pip
+RUN pip install elasticsearch python-dateutil pytz requests
 
 ADD *.py .twitterkey.py .espassword /usr/local/
 RUN mkdir -p /usr/local/data/

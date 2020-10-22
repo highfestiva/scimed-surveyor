@@ -4,3 +4,4 @@ __pycache__/
 .twitterkey.py
 .espassword
 download/.env
+*.log
