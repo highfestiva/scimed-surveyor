@@ -4,6 +4,17 @@ Collects data, and shows charts and articles in medical research areas. Particul
 articles are indexed in this first version.
 
 
+## Setup native Python environment
+
+````bash
+$ pip3 install elasticsearch
+$ pip3 install spacy
+$ python3 -m spacy install en_core_web_sm
+````
+
+The rest happens inside docker containers, so no need for runtime libraries.
+
+
 ## Get started
 
 * Build web server: `docker-compose build`

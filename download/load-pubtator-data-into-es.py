@@ -115,7 +115,9 @@ for line in open(options.file):
             # manual annotations
             text = passage.get('text')
             if text:
-                full_text += text + '.'
+                wordc = len(text.split())
+                if wordc >= 5: # only incorporate "full sentences"
+                    full_text += text + '.'
                 text = text.lower()
                 for topic,values in extra_annotations.items():
                     for value in values:
