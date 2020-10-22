@@ -67,7 +67,7 @@ for fname,topic,heads in [('c2020.bin','chemical',('NM =','SY =')), ('d2020.bin'
 print('term list size:', len(term2topic_name))
 
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('../http-server/.espassword').read().strip()))
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
 if options.reset_index:
     print('deleting index', options.index)
     es.indices.delete(index=options.index, ignore=[400, 404])

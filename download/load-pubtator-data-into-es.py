@@ -142,7 +142,7 @@ def save(article):
 
 print()
 print('deleting index', options.index)
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('../http-server/.espassword').read().strip()))
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
 es.indices.delete(index=options.index, ignore=[400, 404])
 
 print('saving...')

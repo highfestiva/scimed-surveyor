@@ -38,8 +38,9 @@
 +Säkra upp databasen med ett lösenord.
 
 +Lägg till medical_list.txt.
-Använd Spacy för att hitta företagsnamn.
++Använd spaCy för att hitta företagsnamn.
 Bakgrundsuppdatering för Twitter.
+Använd VGR:s twitter-konto-nycklar.
 Nätverksgraf?
 Karta?
 
