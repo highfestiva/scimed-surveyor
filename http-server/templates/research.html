@@ -100,6 +100,7 @@
     $(".dialog-overlay").click(function() {
       $(".dialog-overlay").attr("style", "display:None");
     });
+    window.setTimeout(function(){window.location.reload();}, 60*60*1000); // reload every hour
   </script>
 </body>
 <html>

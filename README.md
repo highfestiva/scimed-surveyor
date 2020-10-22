@@ -7,8 +7,7 @@ articles are indexed in this first version.
 ## Setup native Python environment
 
 ````bash
-$ pip3 install elasticsearch
-$ pip3 install spacy
+$ pip3 install elasticsearch python-dateutil pytz requests spacy
 $ python3 -m spacy install en_core_web_sm
 ````
 
