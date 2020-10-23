@@ -41,6 +41,18 @@ def favicon():
     return send_from_directory('static', 'vgr.ico', mimetype='image/x-icon')
 
 
+@app.route('/')
+def index():
+    indices = sorted(i for i,v in es.indices.get_alias('*').items() if '.' not in i and not v['aliases'])
+    dsources = defaultdict(list)
+    for i in indices:
+        dsource,area = i.split('-',1)
+        name = area
+        url = dsource + '/' + area
+        dsources[dsource] += [{'name':name, 'url':url}]
+    return render_template('landing.html', dsources=dsources)
+
+
 @app.route('/<dsource>/<area>')
 def page_main(dsource, area):
     return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)

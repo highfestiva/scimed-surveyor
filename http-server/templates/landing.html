@@ -1,0 +1,30 @@
+<html>
+<head>
+  <title>VGR Sci-Med Surveyor</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <link rel="stylesheet" href="/static/sci-survey.css?{{ssver}}" type="text/css">
+</head>
+<body>
+  <div class="vgr-logo-container page-reset">
+    <div class="vgr-background page-reset">
+    </div>
+    <div class="vgr-logo page-reset">
+      <div class="vgr-name page-reset">Sci-Med Surveyor</div>
+    </div>
+  </div>
+  <div class="inline main-chart">
+    {% for dsource,paths in dsources.items() %}
+    <div>
+      <h2>{{dsource}}</h2>
+      <ul>
+        {% for path in paths %}
+          <li>
+            <a href="{{path.url}}">{{path.name}}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </div>
+</body>
+<html>

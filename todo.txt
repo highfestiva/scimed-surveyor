@@ -40,12 +40,16 @@
 +Lägg till medical_list.txt.
 +Använd spaCy för att hitta företagsnamn.
 +Bakgrundsuppdatering för Twitter.
++Landningssida.
+
+Karta?
 Förskjut 0,5 staplar åt höger.
 Använd webbläsarens tidszon.
 Använd VGR:s twitter-konto-nycklar.
+Jämföra flera sökningar/sjukdomar.
 Nätverksgraf?
-Karta?
 Lägg Twitter-uppdateringen i docker compose.
+Dokumentera twitter-bakgrundsuppdatering
 
 ?Länka ut till ny websida
 
