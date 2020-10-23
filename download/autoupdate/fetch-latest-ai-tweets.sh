@@ -14,7 +14,7 @@ do
 	./load-twitter-data-into-es.py --index twitter-tech
 	cat data/twitter.json >> data/orig_twitter.json
 	popd
-	seconds_til_next_hour=$(($(date -d $(date -Ihours) +%s) + 3600 - $(date +%s)))
+	seconds_til_next_hour=$(($(date -d $(date -Ihours) +%s) + 3600 + 120 - $(date +%s))) # wait a couple minutes extra
 	echo "Sleeping $seconds_til_next_hour seconds until next Twitter update."
 	sleep $seconds_til_next_hour
 done
