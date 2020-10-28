@@ -1,6 +1,7 @@
 from bokeh.models import ColorBar, GeoJSONDataSource, LinearColorMapper
 from bokeh.plotting import figure
 from bokeh.tile_providers import get_provider
+from copy import deepcopy
 from functools import lru_cache
 import json
 
@@ -12,7 +13,7 @@ def load_countries():
 
 def plot_map(country_code2score):
     max_score = max(country_code2score.values())
-    j = load_countries()
+    j = deepcopy(load_countries()) # don't mess with cached data
     features = []
     for feature in j['features']:
         cc = feature['properties']['country_code']
