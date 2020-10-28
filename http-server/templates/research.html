@@ -86,6 +86,8 @@
         $.getJSON(url).done(function(mapData) {
           $(".world-map-title").text(mapData['name']);
           Bokeh.embed.embed_item(mapData['plot'], "world-map-plot");
+        }).fail(function() {
+          $(".world-map-chart").hide();
         });
       } else {
         $(".world-map-chart").hide();
