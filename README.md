@@ -35,6 +35,8 @@ Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the cha
 [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/) as templating-library for the html.
 [jQuery](https://jquery.com/) is used client-side to manipulate the DOM.
 
+Country shape data was downloaded 2020-10-23 from [Natural Earth](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/).
+
 
 ## [Docker](https://www.docker.com/) setup
 

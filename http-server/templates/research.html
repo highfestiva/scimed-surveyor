@@ -32,6 +32,16 @@
       </div>
     </div>
   </div>
+  <div class="world-map-chart">
+    <div class="flex-outer world-map-outer">
+      <div class="world-map-title">
+      </div>
+      <div class="world-map-holder flex-inner">
+        <div id="world-map-plot">
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="articles-top">
     <table class="articles">
     </table>
@@ -48,7 +58,7 @@
   <script>
     var url = '{{area}}/plot-main' + window.location.search;
     $.getJSON(url).done(function(data) {
-      main = data["main"];
+      var main = data["main"];
       $(".main-title").text(main['name']);
       if (main['filter-suffix']) {
         $(".main-title").append(' <span class="close-filter page-reset">X</span>');
@@ -57,7 +67,7 @@
         window.location.assign("{{area}}");
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
-      var annotSuffix = data["annot_suffix"]
+      var annotSuffix = data["annot-suffix"]
       $(".sub-annotations").addClass("sub-annotations-"+annotSuffix)
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
@@ -66,6 +76,20 @@
         $(".sub-annotations").append('<div class="annotation-layout annotation-layout-'+annotSuffix+'"><div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div></div>');
         Bokeh.embed.embed_item(v["plot"], cId);
       });
+      $(".articles").append('<tr><td class="line-no header">#</td><td class="header">' + data['article-header'] + '</td></tr>');
+      data['articles'].map(function(v, i) {
+        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'" target="_blank">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
+      });
+      if (data["has-map"]) {
+        // load map
+        var url = '{{area}}/plot-world-map' + window.location.search;
+        $.getJSON(url).done(function(mapData) {
+          $(".world-map-title").text(mapData['name']);
+          Bokeh.embed.embed_item(mapData['plot'], "world-map-plot");
+        });
+      } else {
+        $(".world-map-chart").hide();
+      }
       // open annotation dialog
       $(".annotation-link").click(function(ev) {
         ev.preventDefault();
@@ -91,10 +115,6 @@
             });
           });
         });
-      });
-      $(".articles").append('<tr><td class="line-no header">#</td><td class="header">' + data['article-header'] + '</td></tr>');
-      data['articles'].map(function(v, i) {
-        $(".articles").append('<tr><td class="line-no">'+(i+1)+'.</td><td><a href="'+v["url"]+'" target="_blank">'+v["title"]+'</a> ('+v["date"]+')</td></tr>');
       });
     });
     $(".dialog-overlay").click(function() {

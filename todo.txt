@@ -41,8 +41,8 @@
 +Använd spaCy för att hitta företagsnamn.
 +Bakgrundsuppdatering för Twitter.
 +Landningssida.
++Karta.
 
-Karta?
 Förskjut 0,5 staplar åt höger.
 Använd webbläsarens tidszon.
 Använd VGR:s twitter-konto-nycklar.

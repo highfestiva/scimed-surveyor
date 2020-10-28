@@ -81,7 +81,7 @@ for line in open(options.file):
         # print('---------------------')
         line = loads(line[1:])
         pubmed_id = line['_id'].split('|')[0]
-        title = ''
+        title = journal = ''
         date = orig_date = None
         annotations = defaultdict(set)
         full_text = ''
@@ -128,7 +128,7 @@ for line in open(options.file):
             if orgs:
                 annotations['organization'] = orgs
         annotations = {k:sorted(v) for k,v in annotations.items()}
-        article = {'id':pubmed_id, 'date':date, 'title':title, 'annotations':annotations}
+        article = {'id':pubmed_id, 'date':date, 'title':title, 'journal':journal, 'annotations':annotations}
         articles.append(article)
         if len(articles) >= options.limit:
             break

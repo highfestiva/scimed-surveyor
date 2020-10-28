@@ -2,19 +2,19 @@
 
 import bokeh
 from bokeh.embed import json_item
-from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, CustomJS, WheelZoomTool
+from bokeh.models import ColumnDataSource, CustomJS
 from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
-from bokeh.palettes import cividis, Category20
 from bokeh.plotting import figure
 import calendar
 from collections import defaultdict
 from copy import deepcopy
-from dateutil import parser as date_parser
 from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
+import journal_util
+from journal_countrycode import journal2country_code, doi2cc
 from os import getenv
 import pandas as pd
+from world_country_score import plot_map
 
 
 chunk_hits = 10000
@@ -62,13 +62,32 @@ def page_main(dsource, area):
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     docs = fetch_docs(index=index, annotations=request.args)
-    nouns = 'tweets' if dsource=='twitter' else 'articles'
     sample_t = hour if dsource=='twitter' else day
-    main_plot = create_main_plot(docs, nouns, dsource, area, sample_t=sample_t)
+    main_plot = create_main_plot(docs, dsource, area, sample_t=sample_t)
     plots = create_annotation_plots(docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
     annotation_suffix = len(plots)
-    return jsonify({'main':main_plot, 'annotations':plots, 'annot_suffix':annotation_suffix, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50]})
+    nouns = nounify(dsource)
+    has_map = dsource!='twitter'
+    return jsonify({'main':main_plot, 'annotations':plots, 'annot-suffix':annotation_suffix, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50], 'has-map':has_map})
+
+
+@app.route('/<dsource>/<area>/plot-world-map')
+def plot_world_map(dsource, area):
+    index = '%s-%s' % (dsource, area)
+    docs = fetch_docs(index=index, annotations=request.args)
+    cc2score = defaultdict(int)
+    for doc in docs:
+        journal,doip = journal_util.extract(doc['journal'])
+        cc = journal2country_code.get(journal)
+        if not cc:
+            cc = doi2cc.get(doip)
+        if cc:
+            cc2score[cc] += 1
+    p = plot_map(cc2score)
+    nouns = nounify(dsource)
+    map_title = '%i %s %s in %i countries' % (len(docs), area, nouns, len(cc2score))
+    return {'name':map_title, 'plot': json_item(p)}
 
 
 @app.route('/<dsource>/<area>/list-labels/<annotation>')
@@ -118,7 +137,7 @@ def sum_annotations(docs, only_annotation):
     return annotations
 
 
-def create_main_plot(docs, nouns, dsource, area, sample_t):
+def create_main_plot(docs, dsource, area, sample_t):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
@@ -127,6 +146,7 @@ def create_main_plot(docs, nouns, dsource, area, sample_t):
     df['t'] = pd.to_datetime(df.t)
 
     # create main plot
+    nouns = nounify(dsource)
     dsourcename = '' if nouns=='tweets' else dsource
     main_title = '%i %s %s %s' % (len(docs), area, dsourcename, nouns)
     filter_suffix = ''
@@ -186,14 +206,15 @@ def articlify(docs):
     return sorted(articles, key=lambda a: a['date'], reverse=True)
 
 
+def nounify(dsource):
+    return 'tweets' if dsource=='twitter' else 'articles'
+
+
 def create_date_plot(dsource, df, sample_t):
     x0,x1 = x_rng_percentile(dsource, df, 1)
     ymax = df.n.max() * 1.05
-    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,reset')
+    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,wheel_zoom,reset', active_scroll='wheel_zoom')
     p.toolbar.logo = None
-    zoom = WheelZoomTool(dimensions='width')
-    p.add_tools(zoom)
-    p.toolbar.active_scroll = zoom
     dtf = DatetimeTickFormatter()
     dtf.milliseconds = ['%T']
     dtf.seconds = dtf.minsec = ['%T']

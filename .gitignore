@@ -4,4 +4,6 @@ __pycache__/
 .twitterkey.py
 .espassword
 download/.env
+http-server/journal_util.py
+http-server/data/
 *.log

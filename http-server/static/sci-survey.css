@@ -63,7 +63,7 @@ span.close-filter {
 	font-weight: bold;
 	cursor: pointer;
 }
-.main-holder {
+.main-holder, .world-map-holder {
 	height: 100%;
 }
 .sub-annotations-top {
@@ -121,6 +121,13 @@ span.close-filter {
 }
 .main-annotations {
 	padding: 2em;
+}
+
+.world-map-chart {
+	width: 90vw;
+	height: 30vw;
+	min-height: 30em;
+	margin: 3% auto 0 auto;
 }
 
 .articles-top {
