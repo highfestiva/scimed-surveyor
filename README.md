@@ -16,8 +16,7 @@ The rest happens inside docker containers, so no need for runtime libraries.
 
 ## Get started
 
-* Build web server: `docker-compose build`
-* Start Elasticsearch, nginx and web server: `docker-compose up -d`
+* Build web server, start Elasticsearch, nginx and the rest: `./redeploy.sh`
 * Download data: `cd download; ./download-data-pubtator-covid-19.sh`
 * Save into Elasticsearch's DB: `cd download; ./load-pubtator-into-es.py --index pubtator-covid-19 --file data/litcovid2pubtator.json`
 * Open browser towards localhost:8080/pubtator/covid-19

@@ -32,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div class="world-map-chart">
+  <div class="world-map-chart" style="background-color: #d4dadc;">
     <div class="flex-outer world-map-outer">
       <div class="world-map-title">
       </div>
@@ -84,6 +84,7 @@
         // load map
         var url = '{{area}}/plot-world-map' + window.location.search;
         $.getJSON(url).done(function(mapData) {
+          $(".world-map-chart").removeAttr("style");
           $(".world-map-title").text(mapData['name']);
           Bokeh.embed.embed_item(mapData['plot'], "world-map-plot");
         }).fail(function() {
