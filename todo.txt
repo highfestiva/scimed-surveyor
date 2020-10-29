@@ -43,13 +43,19 @@
 +Landningssida.
 +Karta.
 
-Förskjut 0,5 staplar åt höger.
-Använd webbläsarens tidszon.
+Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
 Använd VGR:s twitter-konto-nycklar.
 Jämföra flera sökningar/sjukdomar.
-Nätverksgraf?
+Konfiguration för vad som syns vart.
+
+Förskjut 0,5 staplar åt höger.
+Använd webbläsarens tidszon.
 Lägg Twitter-uppdateringen i docker compose.
 Dokumentera twitter-bakgrundsuppdatering
+
+Överlämning.
+
+Nätverksgraf?
 
 ?Länka ut till ny websida
 
@@ -66,4 +72,3 @@ Produktionsdeploy av Flask
 Fixa caching.
 Separera JS eller hålla lätt att maint:a?
 
-Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.

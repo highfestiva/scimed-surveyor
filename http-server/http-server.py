@@ -10,6 +10,7 @@ from collections import defaultdict
 from copy import deepcopy
 from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
+from functools import lru_cache
 import journal_util
 from journal_countrycode import journal2country_code, doi2cc
 from os import getenv
@@ -109,10 +110,15 @@ def list_labels(dsource, area, annotation):
 
 
 def fetch_docs(index, annotations=None):
+    return deepcopy(_fetch_docs(index, annotations))
+
+
+@lru_cache(maxsize=4)
+def _fetch_docs(index, annotations=None):
     kwargs = {}
     if annotations:
         kwargs = {'body': deepcopy(es_query)}
-        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv.strip('#')}} for k,v in annotations.items() for vv in v.split(',')]
+        kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv.strip('#').replace(' ','_')}} for k,v in annotations.items() for vv in v.split(',')]
         print(kwargs)
     docs = []
     r = es.search(index=index, size=chunk_hits, scroll='2s', **kwargs)
@@ -133,6 +139,7 @@ def sum_annotations(docs, only_annotation):
             if only_annotation and k != only_annotation:
                 continue
             for label in v:
+                label = label.replace('_', ' ')
                 annotations[k][label] += 1
     return annotations
 

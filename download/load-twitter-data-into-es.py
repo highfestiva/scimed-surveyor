@@ -37,7 +37,7 @@ def read_tweet(text, options):
     orgs = organizations.extract(orig_text)
     if orgs:
         annotations['organization'] = orgs
-    tweet['annotations'] = {k:sorted(v) for k,v in annotations.items()}
+    tweet['annotations'] = {k:sorted(v.replace(' ','_') for v in vv) for k,vv in annotations.items()}
     return tweet
 
 

@@ -127,7 +127,7 @@ for line in open(options.file):
             orgs = organizations.extract(full_text)
             if orgs:
                 annotations['organization'] = orgs
-        annotations = {k:sorted(v) for k,v in annotations.items()}
+        annotations = {k:sorted(v.replace(' ','_') for v in vv) for k,vv in annotations.items()}
         article = {'id':pubmed_id, 'date':date, 'title':title, 'journal':journal, 'annotations':annotations}
         articles.append(article)
         if len(articles) >= options.limit:
