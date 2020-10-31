@@ -15,6 +15,8 @@ services:
       - elastic
     environment:
       - SCIMEDVER=${COMMIT}
+    volumes:
+      - ./http-server/conf:/usr/local/conf
 
   elastic:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2

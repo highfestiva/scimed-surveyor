@@ -65,7 +65,7 @@
         $(".main-title").append(' <span class="close-filter page-reset">X</span>');
       }
       $(".page-reset").click(function() {
-        window.location.assign("{{area}}");
+        window.location.assign("{{area}}?_");
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
       var annotSuffix = data["annot-suffix"]

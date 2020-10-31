@@ -8,13 +8,15 @@ from bokeh.plotting import figure
 import calendar
 from collections import defaultdict
 from copy import deepcopy
-from flask import Flask, jsonify, request, render_template, send_from_directory
 from elasticsearch import Elasticsearch
+from flask import Flask, jsonify, request, render_template, send_from_directory
+from frozendict import frozendict
 from functools import lru_cache
 import journal_util
 from journal_countrycode import journal2country_code, doi2cc
 from os import getenv
 import pandas as pd
+from conf.settings import page_settings
 from world_country_score import plot_map
 
 
@@ -62,59 +64,78 @@ def page_main(dsource, area):
 @app.route('/<dsource>/<area>/plot-main')
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
-    docs = fetch_docs(index=index, annotations=request.args)
-    sample_t = hour if dsource=='twitter' else day
-    main_plot = create_main_plot(docs, dsource, area, sample_t=sample_t)
+    l_args = get_l_args(index)
+    sample_t = get_setting(index+'.period', day)
+    docs = fetch_docs(index=index, annotations=l_args[0])
+    main_plot = create_main_plot(docs, dsource, area, l_args, sample_t=sample_t)
+    for i,sargs in enumerate(l_args[1:]):
+        docs2 = fetch_docs(index=index, annotations=sargs)
+        df = docs2df(docs2)
+        add_line(main_plot['plot'], df, color=i+1, legend=args2str(sargs))
+    main_plot['plot'] = json_item(main_plot['plot'])
     plots = create_annotation_plots(docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
     annotation_suffix = len(plots)
     nouns = nounify(dsource)
-    has_map = dsource!='twitter'
+    has_map = get_setting(index+'.map', True)
     return jsonify({'main':main_plot, 'annotations':plots, 'annot-suffix':annotation_suffix, 'article-header':'Latest '+nouns+main_plot['filter-suffix'], 'articles':articles[:50], 'has-map':has_map})
 
 
 @app.route('/<dsource>/<area>/plot-world-map')
 def plot_world_map(dsource, area):
-    index = '%s-%s' % (dsource, area)
-    docs = fetch_docs(index=index, annotations=request.args)
-    cc2score = defaultdict(int)
-    for doc in docs:
-        journal,doip = journal_util.extract(doc['journal'])
-        cc = journal2country_code.get(journal)
-        if not cc:
-            cc = doi2cc.get(doip)
-        if cc:
-            cc2score[cc] += 1
-    p = plot_map(cc2score)
-    nouns = nounify(dsource)
-    map_title = '%i %s %s in %i countries' % (len(docs), area, nouns, len(cc2score))
-    return {'name':map_title, 'plot': json_item(p)}
+    try:
+        index = '%s-%s' % (dsource, area)
+        l_args = get_l_args(index)
+        docs = fetch_docs(index=index, annotations=l_args[0])
+        cc2score = defaultdict(int)
+        for doc in docs:
+            journal,doip = journal_util.extract(doc['journal'])
+            cc = journal2country_code.get(journal)
+            if not cc:
+                cc = doi2cc.get(doip)
+            if cc:
+                cc2score[cc] += 1
+        p = plot_map(cc2score)
+        nouns = nounify(dsource)
+        map_title = '%i %s %s in %i countries' % (len(docs), area, nouns, len(cc2score))
+        return {'name':map_title, 'plot': json_item(p)}
+    except:
+        return {}, 400
 
 
 @app.route('/<dsource>/<area>/list-labels/<annotation>')
 def list_labels(dsource, area, annotation):
     index = '%s-%s' % (dsource, area)
-    docs = fetch_docs(index=index, annotations=request.args)
+    l_args = get_l_args(index)
+    docs = fetch_docs(index=index, annotations=l_args[0])
     annotations = sum_annotations(docs, only_annotation=annotation)
     for k,v in annotations.items():
         annotations[k] = sorted(v.items(), key=lambda kv:-kv[1])
     r = {'annotations':[{'name':k, 'labels':v} for k,v in annotations.items()]}
     for a in r['annotations']:
         aname = a['name']
-        if request.args:
-            items = sorted(request.args.items(), key=lambda kv: -1 if kv[0]==aname else 1)
+        if l_args[0]:
+            items = sorted(l_args[0].items(), key=lambda kv: -1 if kv[0]==aname else 1)
             sargs = ' AND '.join([(('%s=%s'%(k,v)) if k!=aname else v) for k,v in items])
             aname += ' (FILTERED BY %s)' % sargs
         a['fullname'] = aname
     return jsonify(r)
 
 
+def get_l_args(index):
+    args = {k:v for k,v in request.args.items() if k!='_'}
+    l_args = get_setting(index+'.search', [{}])
+    if request.args:
+        l_args = [args] + l_args[1:]
+    return l_args
+
+
 def fetch_docs(index, annotations=None):
-    return deepcopy(_fetch_docs(index, annotations))
+    return deepcopy(_fetch_docs(index, frozendict(annotations)))
 
 
 @lru_cache(maxsize=4)
-def _fetch_docs(index, annotations=None):
+def _fetch_docs(index, annotations):
     kwargs = {}
     if annotations:
         kwargs = {'body': deepcopy(es_query)}
@@ -144,25 +165,22 @@ def sum_annotations(docs, only_annotation):
     return annotations
 
 
-def create_main_plot(docs, dsource, area, sample_t):
-    data = defaultdict(int)
-    for doc in docs:
-        data[doc['date']] += 1
-    smear_partial_dates(data)
-    df = pd.DataFrame(sorted((k,v) for k,v in data.items()), columns=['t','n'])
-    df['t'] = pd.to_datetime(df.t)
+def create_main_plot(docs, dsource, area, l_args, sample_t):
+    df = docs2df(docs)
 
     # create main plot
     nouns = nounify(dsource)
     dsourcename = '' if nouns=='tweets' else dsource
     main_title = '%i %s %s %s' % (len(docs), area, dsourcename, nouns)
     filter_suffix = ''
-    if request.args:
-        sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in request.args.items()])
+    if l_args[0]:
+        sargs = args2str(l_args[0])
         filter_suffix = ' (FILTERED BY %s)' % sargs
         main_title += filter_suffix
-    p = create_date_plot(dsource, df, sample_t)
-    return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':json_item(p)}
+    else:
+        sargs = '%s %s (unfiltered)' % (dsource, area)
+    p = create_date_plot(dsource, df, sample_t, legend=sargs if len(l_args)>=2 else None)
+    return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':p}
 
 
 def create_annotation_plots(docs, limit):
@@ -217,7 +235,32 @@ def nounify(dsource):
     return 'tweets' if dsource=='twitter' else 'articles'
 
 
-def create_date_plot(dsource, df, sample_t):
+def get_setting(key, default):
+    d = page_settings
+    v = default
+    for k in key.split('.'):
+        if k in d:
+            v = d = d[k]
+        else:
+            return default
+    return v
+
+
+def args2str(args):
+    return ' AND '.join([('%s=%s'%(k,v)) for k,v in args.items()])
+
+
+def docs2df(docs):
+    data = defaultdict(int)
+    for doc in docs:
+        data[doc['date']] += 1
+    smear_partial_dates(data)
+    df = pd.DataFrame(sorted((k,v) for k,v in data.items()), columns=['t','n'])
+    df['t'] = pd.to_datetime(df.t)
+    return df
+
+
+def create_date_plot(dsource, df, sample_t, legend):
     x0,x1 = x_rng_percentile(dsource, df, 1)
     ymax = df.n.max() * 1.05
     p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,wheel_zoom,reset', active_scroll='wheel_zoom')
@@ -232,10 +275,17 @@ def create_date_plot(dsource, df, sample_t):
     p.xaxis.formatter = dtf
     p.xgrid.grid_line_color = None
     p.vbar(x=df.t, top=df.n, width=sample_t, color='#ccffcc')
+    add_line(p, df, color=0, legend=legend)
+    return p
+
+
+def add_line(p, df, color, legend=None):
     if len(df) > 50:
         smooth = df.n.rolling(14, center=True).mean()
-        p.line(x=df.t, y=smooth, color='#005500')
-    return p
+        kw = {'legend_label':legend} if legend else {}
+        colors = ['#005500', '#ccaa00', '#1166cc', '#ee22ff', '#44ddbb']
+        color = colors[color%len(colors)]
+        p.line(x=df.t, y=smooth, color=color, **kw)
 
 
 def x_rng_percentile(dsource, df, pct):
