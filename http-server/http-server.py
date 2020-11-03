@@ -67,6 +67,11 @@ def page_main(dsource, area):
     return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)
 
 
+@app.route('/<dsource>/<area>/compare-annotations')
+def compare_annotations(dsource, area):
+    return render_template('compare-annotations.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)
+
+
 @app.route('/<dsource>/<area>/plot-main')
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
@@ -77,7 +82,7 @@ def plot_main(dsource, area):
     for i,sargs in enumerate(l_args[1:]):
         docs2 = fetch_docs(index=index, annotations=sargs)
         df = docs2df(docs2)
-        add_line(main_plot['plot'], df, color=i+1, legend=args2str(sargs))
+        add_line(main_plot['plot'], df, color=i+1, legend=args2str(dsource, area, sargs))
     main_plot['plot'] = json_item(main_plot['plot'])
     plots = create_annotation_plots(docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
@@ -182,12 +187,10 @@ def create_main_plot(docs, dsource, area, l_args, sample_t):
     dsourcename = '' if nouns=='tweets' else dsource
     main_title = '%i %s %s %s' % (len(docs), area, dsourcename, nouns)
     filter_suffix = ''
+    sargs = args2str(dsource, area, l_args[0])
     if l_args[0]:
-        sargs = args2str(l_args[0])
         filter_suffix = ' (FILTERED BY %s)' % sargs
         main_title += filter_suffix
-    else:
-        sargs = '%s %s (unfiltered)' % (dsource, area)
     p = create_date_plot(dsource, df, sample_t, legend=sargs if len(l_args)>=2 else None)
     return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':p}
 
@@ -255,7 +258,9 @@ def get_setting(key, default=None):
     return v
 
 
-def args2str(args):
+def args2str(dsource, area, args):
+    if not args:
+        return '%s %s (unfiltered)' % (dsource, area)
     return ' AND '.join([('%s=%s'%(k,v)) for k,v in args.items()])
 
 

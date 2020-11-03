@@ -62,23 +62,49 @@
       var main = data["main"];
       $(".main-title").text(main['name']);
       if (main['filter-suffix']) {
-        $(".main-title").append(' <span class="close-filter page-reset">X</span>');
+        $(".main-title").append(' <span class="filter-button close-filter page-reset">X</span>');
       }
+      var url = new URL(window.location.href);
+      var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
+      var fannots = filter.length > 1? Object.keys(filter[1]) : [];
+      fannots = fannots.length? fannots : "other";
+      var compareText = filter.length > 1? "Switch to "+fannots+" filter" : "Compare";
+      $(".main-title").append(' <span class="filter-button compare-filter">'+compareText+'</span>');
       $(".page-reset").click(function() {
         var url = new URL(window.location.href);
         var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
-        filter[0] = {};
+        if (filter.length > 1) {
+          filter.shift();
+        } else {
+          filter[0] = {};
+        }
+        url.searchParams.set("filter", JSON.stringify(filter));
+        window.location.assign(url);
+      });
+      $(".compare-filter").click(function() {
+        var url = new URL(window.location.href);
+        var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
+        if (filter.length < 2) {
+          filter.push({});
+        }
+        var a = filter[0];
+        filter[0] = filter[1];
+        filter[1] = a;
         url.searchParams.set("filter", JSON.stringify(filter));
         window.location.assign(url);
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
       var annotSuffix = data["annot-suffix"]
       $(".sub-annotations").addClass("sub-annotations-"+annotSuffix)
+      var annotCmpUrl = "{{area}}/compare-annotations?" + url.searchParams;
+      var cmpLink = filter.length > 1? ' <span class="annotation-cmp">— <a href="'+annotCmpUrl+'">compare annotations</a></span>' : '';
       data['annotations'].map(function(v, i) {
         var cId = "annotation-plot-" + i;
         var annotation = v["name"];
         var annotationUrl = annotation + window.location.search;
-        $(".sub-annotations").append('<div class="annotation-layout annotation-layout-'+annotSuffix+'"><div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+annotationUrl+'">'+annotation+'</a></p><div class="annotation-chart"><div id="'+cId+'"></div></div></div></div>');
+        var annotationDiv = '<div class="annotation-layout annotation-layout-'+annotSuffix+'"><div class="annotation"><p><a class="annotation-link" href="{{area}}/list-labels/'+
+                            annotationUrl+'">'+annotation+'</a>'+cmpLink+'</p><div class="annotation-chart"><div id="'+cId+'"></div></div></div></div>'
+        $(".sub-annotations").append(annotationDiv);
         Bokeh.embed.embed_item(v["plot"], cId);
       });
       $(".articles").append('<tr><td class="line-no header">#</td><td class="header">' + data['article-header'] + '</td></tr>');

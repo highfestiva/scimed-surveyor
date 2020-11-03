@@ -53,7 +53,7 @@ html, body {
 .main-title {
 	padding-left: 1.6em;
 }
-span.close-filter {
+span.filter-button {
 	color: #fff;
 	background: #a00;
 	font-size: 70%;
@@ -62,9 +62,20 @@ span.close-filter {
 	display: inline-block;
 	font-weight: bold;
 	cursor: pointer;
+	position: relative;
+	top: -1px;
+}
+span.compare-filter {
+	background: #05a;
 }
 .main-holder, .world-map-holder {
 	height: 100%;
+}
+.annotation-cmp {
+  display: none;
+}
+.sub-annotations-outer:hover .annotation-cmp {
+  display: inline-block;
 }
 .sub-annotations-top {
 	width: 28%;

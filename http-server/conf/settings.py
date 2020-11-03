@@ -7,6 +7,6 @@ page_settings = {
     },
 
     'pubtator-tech': {
-        'filter': [{'medicine':['telemedicine']}, {'medicine':['surgery']}, {'ai':['classifier']}],
+        'filter': [{'medicine':['telemedicine']}, {'ai':['classifier']}],
 	}
 }
