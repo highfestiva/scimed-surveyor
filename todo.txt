@@ -43,11 +43,12 @@
 +Landningssida.
 +Karta.
 +Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
++Konfiguration för vad som syns vart.
 
 Jämföra flera sökningar/sjukdomar.
 Använd VGR:s twitter-konto-nycklar.
-Konfiguration för vad som syns vart.
 
+Gör konfigurationen förändringsbar runtime.
 Förskjut 0,5 staplar åt höger.
 Använd webbläsarens tidszon.
 Lägg Twitter-uppdateringen i docker compose.

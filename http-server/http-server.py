@@ -7,16 +7,18 @@ from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
 from bokeh.plotting import figure
 import calendar
 from collections import defaultdict
+from conf.settings import page_settings
 from copy import deepcopy
 from elasticsearch import Elasticsearch
 from flask import Flask, jsonify, request, render_template, send_from_directory
 from frozendict import frozendict
 from functools import lru_cache
+import json
 import journal_util
 from journal_countrycode import journal2country_code, doi2cc
 from os import getenv
 import pandas as pd
-from conf.settings import page_settings
+import urllib.parse
 from world_country_score import plot_map
 
 
@@ -52,6 +54,10 @@ def index():
         dsource,area = i.split('-',1)
         name = area
         url = dsource + '/' + area
+        f = get_setting(i+'.filter')
+        if f:
+            print(f, type(f), json.dumps(f))
+            url += '?filter=' + urllib.parse.quote(json.dumps(f).replace(' ',''))
         dsources[dsource] += [{'name':name, 'url':url}]
     return render_template('landing.html', dsources=dsources)
 
@@ -64,7 +70,7 @@ def page_main(dsource, area):
 @app.route('/<dsource>/<area>/plot-main')
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
-    l_args = get_l_args(index)
+    l_args = get_l_args()
     sample_t = get_setting(index+'.period', day)
     docs = fetch_docs(index=index, annotations=l_args[0])
     main_plot = create_main_plot(docs, dsource, area, l_args, sample_t=sample_t)
@@ -85,7 +91,7 @@ def plot_main(dsource, area):
 def plot_world_map(dsource, area):
     try:
         index = '%s-%s' % (dsource, area)
-        l_args = get_l_args(index)
+        l_args = get_l_args()
         docs = fetch_docs(index=index, annotations=l_args[0])
         cc2score = defaultdict(int)
         for doc in docs:
@@ -106,7 +112,7 @@ def plot_world_map(dsource, area):
 @app.route('/<dsource>/<area>/list-labels/<annotation>')
 def list_labels(dsource, area, annotation):
     index = '%s-%s' % (dsource, area)
-    l_args = get_l_args(index)
+    l_args = get_l_args()
     docs = fetch_docs(index=index, annotations=l_args[0])
     annotations = sum_annotations(docs, only_annotation=annotation)
     for k,v in annotations.items():
@@ -122,12 +128,14 @@ def list_labels(dsource, area, annotation):
     return jsonify(r)
 
 
-def get_l_args(index):
-    args = {k:v for k,v in request.args.items() if k!='_'}
-    l_args = get_setting(index+'.search', [{}])
-    if request.args:
-        l_args = [args] + l_args[1:]
-    return l_args
+def get_l_args():
+    v = eval(request.args.get('filter', '{}'))
+    if type(v) != list:
+        v = [v]
+    for vv in v:
+        for k,w in vv.items():
+            vv[k] = ','.join(w)
+    return v
 
 
 def fetch_docs(index, annotations=None):
@@ -148,6 +156,7 @@ def _fetch_docs(index, annotations):
         r = es.scroll(scroll_id = r['_scroll_id'], scroll = '2s')
     docs = [d['_source'] for d in docs]
     docs = [d for d in docs if d['date']] # only keep documents with dates
+    print('%s docs found.' % len(docs))
     return docs
 
 
@@ -235,7 +244,7 @@ def nounify(dsource):
     return 'tweets' if dsource=='twitter' else 'articles'
 
 
-def get_setting(key, default):
+def get_setting(key, default=None):
     d = page_settings
     v = default
     for k in key.split('.'):
@@ -324,14 +333,10 @@ def create_annotation_hbar(annotation, data, col_index=0):
             CustomJS(args=dict(labels=labels),
                     code='''var label = labels[cb_obj.indices[0]];
                             var url = new URL(window.location.href);
-                            var annotation = "%s";
-                            var lst = url.searchParams.get(annotation) || [];
-                            if (typeof lst.push !== "function") {
-                                lst = [lst];
-                            }
-                            lst.push(label);
-                            url.searchParams.set(annotation, lst);
-                            window.location.assign(url);''' % annotation))
+                            var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
+                            filter[0]["%s"] = (filter[0]["%s"] || []).concat(label);
+                            url.searchParams.set("filter", JSON.stringify(filter));
+                            window.location.assign(url);''' % (annotation, annotation)))
     return p
 
 

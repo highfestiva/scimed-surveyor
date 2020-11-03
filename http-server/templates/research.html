@@ -65,7 +65,11 @@
         $(".main-title").append(' <span class="close-filter page-reset">X</span>');
       }
       $(".page-reset").click(function() {
-        window.location.assign("{{area}}?_");
+        var url = new URL(window.location.href);
+        var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
+        filter[0] = {};
+        url.searchParams.set("filter", JSON.stringify(filter));
+        window.location.assign(url);
       });
       Bokeh.embed.embed_item(main['plot'], "main-plot");
       var annotSuffix = data["annot-suffix"]
@@ -112,9 +116,10 @@
             $(".annotation-dialog-table a").click(function(ev) {
               ev.preventDefault();
               var url = new URL(window.location.href);
-              var val = url.searchParams.get(annotation);
-              val = (val? val+"," : "") + $(this).text();
-              url.searchParams.set(annotation, val);
+              var filter = JSON.parse(url.searchParams.get("filter")) || [{}];
+              var vals = (filter[0][annotation] || []).concat($(this).text());
+              filter[0][annotation] = vals;
+              url.searchParams.set("filter", JSON.stringify(filter));
               window.location.assign(url);
             });
           });
