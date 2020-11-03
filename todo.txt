@@ -44,15 +44,15 @@
 +Karta.
 +Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
 +Konfiguration för vad som syns vart.
++Jämföra flera sökningar/sjukdomar.
 
-Jämföra flera sökningar/sjukdomar.
 Använd VGR:s twitter-konto-nycklar.
 
-Gör konfigurationen förändringsbar runtime.
 Förskjut 0,5 staplar åt höger.
 Använd webbläsarens tidszon.
 Lägg Twitter-uppdateringen i docker compose.
 Dokumentera twitter-bakgrundsuppdatering
+Läs in konfigurationen regelbundet, runtime - så att det räcker med git pull för att uppdatera.
 
 Överlämning.
 
