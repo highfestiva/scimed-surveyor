@@ -67,11 +67,6 @@ def page_main(dsource, area):
     return render_template('research.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)
 
 
-@app.route('/<dsource>/<area>/compare-annotations')
-def compare_annotations(dsource, area):
-    return render_template('compare-annotations.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version)
-
-
 @app.route('/<dsource>/<area>/plot-main')
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
@@ -131,6 +126,19 @@ def list_labels(dsource, area, annotation):
             aname += ' (FILTERED BY %s)' % sargs
         a['fullname'] = aname
     return jsonify(r)
+
+
+@app.route('/<dsource>/<area>/compare-annotations')
+def compare_annotations(dsource, area):
+    index = '%s-%s' % (dsource, area)
+    filters = []
+    for args in get_l_args():
+        items = sorted(args.items())
+        sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in items])
+        docs = fetch_docs(index=index, annotations=args)
+        plots = create_annotation_plots(docs, limit=10, skip_empty=False)
+        filters.append({'title': sargs, 'annotations': json.dumps(plots)})
+    return render_template('compare-annotations.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version, filters=filters)
 
 
 def get_l_args():
@@ -195,16 +203,19 @@ def create_main_plot(docs, dsource, area, l_args, sample_t):
     return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':p}
 
 
-def create_annotation_plots(docs, limit):
+def create_annotation_plots(docs, limit, skip_empty=True):
     annotations = sum_annotations(docs, only_annotation=None)
 
     plots = []
     for k in sorted(annotations):
         data = [(lk,lv) for lk,lv in sorted(annotations[k].items(), key=lambda kv: kv[1]) if lv>1]
         data = data[-limit:]
-        if len(data) >= 2:
-            p = create_annotation_hbar(k, data, col_index=len(plots))
-            plots.append({'name':k, 'plot':json_item(p)})
+        if not skip_empty or len(data) >= 2:
+            if len(data) >= 2 or (not skip_empty and len(data)==1):
+                p = json_item(create_annotation_hbar(k, data, col_index=len(plots)))
+            else:
+                p = ''
+            plots.append({'name':k, 'plot':p})
     return plots
 
 
@@ -327,7 +338,7 @@ def create_annotation_hbar(annotation, data, col_index=0):
     p.min_border_top = 0
     p.min_border_bottom = 0
     p.ygrid.grid_line_color = None
-    colors = [('#87cded', '#a7edfd'), ('#c0c610', '#d0ff14'), ('#ff7034', '#ff9044'), ('#ff9889', '#ffb8a9'), ('#f4bfff', '#f8dfff')]
+    colors = [('#87cded', '#a7edfd'), ('#c0c610', '#d0ff14'), ('#ff7034', '#ff9044'), ('#ff9889', '#ffb8a9'), ('#f4bfff', '#f8dfff'), ('#bff4bb', '#dff8dd'), ('#c0c0c0', '#b0b0b0'), ('#ff80a0', '#ff90b0')]
     cmap = colors[col_index%len(colors)] * int(len(labels)/2+1)
     cmap = cmap[:len(labels)][::-1]
     ds = ColumnDataSource(dict(labels=labels, value=values, color=cmap))

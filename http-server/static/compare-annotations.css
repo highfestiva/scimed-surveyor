@@ -1,0 +1,67 @@
+html, body {
+	font-family: Arial, Helvetica, sans-serif;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+h1 {
+	text-align: center;
+	margin: 2em;
+}
+p {
+    text-align: center;
+    height: 0;
+    position: relative;
+    top: -4.5em;
+    font-size: 0.8em;
+}
+
+.inline {
+	display: inline-block;
+}
+.sub-annotations-top {
+	width: 43%;
+	margin: 1% 0;
+	vertical-align: top;
+	padding: 0 3%;
+}
+.sub-annotations-top-1 {
+	border-right: 1px solid #ccc;
+}
+.flex-outer {
+	display: flex;
+	flex-flow: column;
+}
+.flex-inner {
+	flex: 1 1 auto;
+}
+.sub-annotations {
+}
+.annotation-layout {
+	display: inline-block;
+	width: 100%;
+}
+.annotation {
+	height: 25em;
+	display: flex;
+	flex-flow: column;
+}
+.annotation-chart {
+	flex: 1 1 auto;
+}
+
+
+@media 	only screen and (max-width: 1100px),
+		only screen and (max-height: 750px),
+		only screen and (min-resolution: 2dppx) {
+
+}
+
+@media only screen and (min-resolution: 2dppx) {
+
+body {
+	font-size: 1.2em;
+}
+
+}

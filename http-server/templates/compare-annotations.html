@@ -2,11 +2,35 @@
 <head>
   <title>{{dsource}} {{area}}</title>
   <meta name="viewport" content="initial-scale=1.0">
-  <link rel="stylesheet" href="/static/sci-survey.css?{{ssver}}" type="text/css">
+  <link rel="stylesheet" href="/static/compare-annotations.css?{{ssver}}" type="text/css">
   <script src="https://cdn.bokeh.org/bokeh/release/bokeh-{{bokeh_version}}.min.js" crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  Qua!
+  <h1>Compare annotations</h1>
+  <p><a id="back" href="../{{area}}">Back to overview</a></p>
+  <script>$("#back").attr("href", "../{{area}}"+window.location.search);</script>
+  <div>
+    {% for f in filters %}
+      <div class="inline sub-annotations-top sub-annotations-top-{{loop.index}}">
+        <div class="flex-outer sub-annotations-outer">
+          <div id="sub-annotations-{{loop.index}}" class="sub-annotations flex-inner">
+            <script>
+              var annotationData = {{f.annotations|safe}};
+              annotationData.map(function(v, i) {
+                var cId = "annotation-plot-{{loop.index}}-" + i;
+                var annotation = v["name"] + " ({{f.title}})";
+                var annotationDiv = '<div class="annotation-layout"><div class="annotation"><h2>'+annotation+'</h2><div class="annotation-chart"><div id="'+cId+'"></div></div></div></div>'
+                $("#sub-annotations-{{loop.index}}").append(annotationDiv);
+                if (v["name"].length) {
+                  Bokeh.embed.embed_item(v["plot"], cId);
+                }
+              });
+            </script>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </body>
 <html>
