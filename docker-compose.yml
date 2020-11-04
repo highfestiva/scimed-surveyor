@@ -14,6 +14,7 @@ services:
     depends_on:
       - elastic
     environment:
+      - ESHOST=elastic
       - SCIMEDVER=${COMMIT}
     volumes:
       - ./http-server/conf:/usr/local/conf
@@ -40,3 +41,12 @@ services:
       - SERVER_REWRITEBASEPATH=true 
     depends_on:
       - elastic
+
+  twitter-updater:
+    build: download/autoupdate
+    depends_on:
+      - elastic
+    environment:
+      - ESHOST=elastic
+    volumes:
+      - ./download/autoupdate/data:/usr/local/data

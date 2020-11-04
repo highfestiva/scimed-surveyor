@@ -9,6 +9,4 @@ ADD templates/ /usr/local/templates/
 ADD static/ /usr/local/static/
 ADD data/ /usr/local/data/
 WORKDIR /usr/local
-ENV ESHOST=elastic
 CMD ["./http-server.py"]
-#CMD ["/bin/bash"]

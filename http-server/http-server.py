@@ -27,8 +27,9 @@ eshost = getenv('ESHOST', 'localhost')
 version = getenv('SCIMEDVER', 'v0.1')
 es = Elasticsearch([{'host': eshost, 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
 app = Flask(__name__)
-hour = 60*60*1000
-day = 24*hour
+minutes_ms = 60*1000
+hours_ms = 60*minutes_ms
+days_ms = 24*hours_ms
 
 es_query = {
     'query': {
@@ -71,12 +72,13 @@ def page_main(dsource, area):
 def plot_main(dsource, area):
     index = '%s-%s' % (dsource, area)
     l_args = get_l_args()
-    sample_t = get_setting(index+'.period', day)
+    time_zone_offset = int(request.values.get('tz', '0')) * minutes_ms
+    sample_t = get_setting(index+'.period', days_ms)
     docs = fetch_docs(index=index, annotations=l_args[0])
-    main_plot = create_main_plot(docs, dsource, area, l_args, sample_t=sample_t)
+    main_plot = create_main_plot(docs, dsource, area, l_args, time_zone_offset=time_zone_offset, sample_t=sample_t)
     for i,sargs in enumerate(l_args[1:]):
         docs2 = fetch_docs(index=index, annotations=sargs)
-        df = docs2df(docs2)
+        df = docs2df(docs2, time_zone_offset, sample_t)
         add_line(main_plot['plot'], df, color=i+1, legend=args2str(dsource, area, sargs))
     main_plot['plot'] = json_item(main_plot['plot'])
     plots = create_annotation_plots(docs, limit=7)
@@ -187,8 +189,8 @@ def sum_annotations(docs, only_annotation):
     return annotations
 
 
-def create_main_plot(docs, dsource, area, l_args, sample_t):
-    df = docs2df(docs)
+def create_main_plot(docs, dsource, area, l_args, time_zone_offset, sample_t):
+    df = docs2df(docs, time_zone_offset, sample_t)
 
     # create main plot
     nouns = nounify(dsource)
@@ -275,13 +277,13 @@ def args2str(dsource, area, args):
     return ' AND '.join([('%s=%s'%(k,v)) for k,v in args.items()])
 
 
-def docs2df(docs):
+def docs2df(docs, time_zone_offset, sample_t):
     data = defaultdict(int)
     for doc in docs:
         data[doc['date']] += 1
     smear_partial_dates(data)
     df = pd.DataFrame(sorted((k,v) for k,v in data.items()), columns=['t','n'])
-    df['t'] = pd.to_datetime(df.t)
+    df['t'] = pd.to_datetime(df.t) + pd.Timedelta(time_zone_offset + sample_t//2, unit='ms') # adjust by timezone, and shift right of X-axis labels
     return df
 
 

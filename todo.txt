@@ -45,18 +45,21 @@
 +Hantera exakt/fuzzy resultat. F.n. är mellanslag i taggar =fuzzy i Elasticsearch.
 +Konfiguration för vad som syns vart.
 +Jämföra flera sökningar/sjukdomar.
++Förskjut 0,5 staplar åt höger.
++Använd webbläsarens tidszon.
 
 Använd VGR:s twitter-konto-nycklar.
+VGR-github?
 
-Förskjut 0,5 staplar åt höger.
-Använd webbläsarens tidszon.
 Lägg Twitter-uppdateringen i docker compose.
 Dokumentera twitter-bakgrundsuppdatering
-Läs in konfigurationen regelbundet, runtime - så att det räcker med git pull för att uppdatera.
+Sampla in ett nytt PubTator-ämne med lång stride för att få in många år, så man kan se utv. över tid.
+Dokumentera.
 
 Överlämning.
 
 Nätverksgraf?
+Läs in konfigurationen regelbundet, runtime - så att det räcker med git pull för att uppdatera.
 
 ?Länka ut till ny websida
 

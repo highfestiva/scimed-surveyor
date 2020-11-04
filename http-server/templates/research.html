@@ -57,7 +57,8 @@
     </div>
   </div>
   <script>
-    var url = '{{area}}/plot-main' + window.location.search;
+    var search = (window.location.search.length? window.location.search+"&" : "?") + "tz="+(-(new Date()).getTimezoneOffset()).toString();
+    var url = '{{area}}/plot-main' + search;
     $.getJSON(url).done(function(data) {
       var main = data["main"];
       $(".main-title").text(main['name']);
