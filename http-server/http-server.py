@@ -283,7 +283,8 @@ def docs2df(docs, time_zone_offset, sample_t):
         data[doc['date']] += 1
     smear_partial_dates(data)
     df = pd.DataFrame(sorted((k,v) for k,v in data.items()), columns=['t','n'])
-    df['t'] = pd.to_datetime(df.t) + pd.Timedelta(time_zone_offset + sample_t//2, unit='ms') # adjust by timezone, and shift right of X-axis labels
+    tzoff = 0 if sample_t < days_ms else time_zone_offset # only offset by timezone in intra-daily resolution
+    df['t'] = pd.to_datetime(df.t) + pd.Timedelta(tzoff + sample_t//2, unit='ms') # adjust by timezone, and shift right of X-axis labels
     return df
 
 
