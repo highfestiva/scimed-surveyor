@@ -47,11 +47,11 @@
 +Jämföra flera sökningar/sjukdomar.
 +Förskjut 0,5 staplar åt höger.
 +Använd webbläsarens tidszon.
++Lägg Twitter-uppdateringen i docker compose.
 
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
-Lägg Twitter-uppdateringen i docker compose.
 Dokumentera twitter-bakgrundsuppdatering
 Sampla in ett nytt PubTator-ämne med lång stride för att få in många år, så man kan se utv. över tid.
 Dokumentera.

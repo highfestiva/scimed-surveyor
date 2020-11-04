@@ -10,9 +10,9 @@ do
 	end_t=`date -u -Ihours`
 	echo "Downloading tweets between ${start_t} and ${end_t}."
 	rm data/twitter.json
-	#./download-twitter-search.py --start-time "$start_t" --end-time "$end_t" --stride-time 30:00 --interval-limit 100 --search "ai (medicine OR healthcare OR ehealth OR telemedicine)"
-	#./load-twitter-data-into-es.py --index twitter-tech
-	#cat data/twitter.json >> data/orig_twitter.json
+	./download-twitter-search.py --start-time "$start_t" --end-time "$end_t" --stride-time 30:00 --interval-limit 100 --search "ai (medicine OR healthcare OR ehealth OR telemedicine)"
+	./load-twitter-data-into-es.py --index twitter-tech
+	cat data/twitter.json >> data/orig_twitter.json
 	# wait until next time
 	seconds_til_next_hour=$(($(date -d $(date -Ihours) +%s) + 3600 + 120 - $(date +%s))) # wait a couple minutes extra
 	echo "Sleeping $seconds_til_next_hour seconds until next Twitter update."

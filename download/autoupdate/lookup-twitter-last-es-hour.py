@@ -19,5 +19,5 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--index', required=True, help='index to search for last entry, e.g. "twitter-tech"')
     options = parser.parse_args()
-    password = open('../.espassword').read().strip()
+    password = open('.espassword').read().strip()
     lookup(index=options.index, password=password)

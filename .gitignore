@@ -1,7 +1,9 @@
 download/data/
+download/autoupdate/data/
 elasticsearch-data/
 __pycache__/
 .twitterkey.py
+download/autoupdate/*.py
 .espassword
 download/.env
 http-server/journal_util.py
