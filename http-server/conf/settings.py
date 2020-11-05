@@ -11,7 +11,7 @@
 
     'pubtator-tech': {
         'filter': [{'medicine':['telemedicine']}, {'ai':['classifier']}],
-        'exclude-annotations': ['species', 'cellline', 'mutation'],
+        'exclude-annotations': ['species', 'cell-line', 'mutation'],
 	},
 
     'pubtator-cardiac-failure': {
@@ -20,6 +20,6 @@
 
     'pubtator-pancreatic-cancer': {
         'filter': [{'medicine':['surgery']}, {'chemical':['gemcitabine']}],
-        'exclude-annotations': ['species', 'cellline', 'ai', 'mutation'],
+        'exclude-annotations': ['species', 'cell-line', 'ai', 'mutation'],
 	},
 }
