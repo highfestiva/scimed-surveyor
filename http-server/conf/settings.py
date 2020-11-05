@@ -1,5 +1,9 @@
 page_settings = {
 
+    '<default>': {
+        'exclude-annotations': ['species'],
+    },
+
     'twitter-tech': {
         'filter': [{'term':['Health']}, {'tech':['ehealth']}],
         'period': 60*60*1000,
@@ -8,9 +12,15 @@ page_settings = {
 
     'pubtator-tech': {
         'filter': [{'medicine':['telemedicine']}, {'ai':['classifier']}],
-	}
+        'exclude-annotations': ['species', 'cellline', 'mutation'],
+	},
+
+    'pubtator-cardiac-failure': {
+        'exclude-annotations': ['species', 'mutation'],
+	},
 
     'pubtator-pancreatic-cancer': {
         'filter': [{'medicine':['surgery']}, {'chemical':['gemcitabine']}],
-	}
+        'exclude-annotations': ['species', 'cellline', 'ai', 'mutation'],
+	},
 }

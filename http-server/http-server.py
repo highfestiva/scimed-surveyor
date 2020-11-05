@@ -39,8 +39,6 @@ es_query = {
     }
 }
 
-skip_annotations = ('species',)
-
 
 @app.route('/favicon.ico')
 def favicon():
@@ -81,7 +79,7 @@ def plot_main(dsource, area):
         df = docs2df(docs2, time_zone_offset, sample_t)
         add_line(main_plot['plot'], df, color=i+1, legend=args2str(dsource, area, sargs))
     main_plot['plot'] = json_item(main_plot['plot'])
-    plots = create_annotation_plots(docs, limit=7)
+    plots = create_annotation_plots(index, docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
     annotation_suffix = len(plots)
     nouns = nounify(dsource)
@@ -116,7 +114,7 @@ def list_labels(dsource, area, annotation):
     index = '%s-%s' % (dsource, area)
     l_args = get_l_args()
     docs = fetch_docs(index=index, annotations=l_args[0])
-    annotations = sum_annotations(docs, only_annotation=annotation)
+    annotations = sum_annotations(index, docs, only_annotation=annotation)
     for k,v in annotations.items():
         annotations[k] = sorted(v.items(), key=lambda kv:-kv[1])
     r = {'annotations':[{'name':k, 'labels':v} for k,v in annotations.items()]}
@@ -175,7 +173,8 @@ def _fetch_docs(index, annotations):
     return docs
 
 
-def sum_annotations(docs, only_annotation):
+def sum_annotations(index, docs, only_annotation):
+    skip_annotations = set(get_setting(index+'.exclude-annotations', default=[]))
     annotations = defaultdict(lambda: defaultdict(int))
     for doc in docs:
         for k,v in doc['annotations'].items():
@@ -205,8 +204,8 @@ def create_main_plot(docs, dsource, area, l_args, time_zone_offset, sample_t):
     return {'name':main_title, 'filter-suffix':filter_suffix, 'plot':p}
 
 
-def create_annotation_plots(docs, limit, skip_empty=True):
-    annotations = sum_annotations(docs, only_annotation=None)
+def create_annotation_plots(index, docs, limit, skip_empty=True):
+    annotations = sum_annotations(index, docs, only_annotation=None)
 
     plots = []
     for k in sorted(annotations):
@@ -260,15 +259,25 @@ def nounify(dsource):
     return 'tweets' if dsource=='twitter' else 'articles'
 
 
-def get_setting(key, default=None):
+def _get_setting(key_parts):
     d = page_settings
-    v = default
-    for k in key.split('.'):
+    v = None
+    for k in key_parts:
         if k in d:
             v = d = d[k]
         else:
-            return default
+            return None
     return v
+
+
+def get_setting(key, default=None):
+    key_parts = key.split('.')
+    val = _get_setting(key_parts)
+    if val is None:
+        val = _get_setting(['<default>']+key_parts[1:])
+    if val is None:
+        val = default
+    return val
 
 
 def args2str(dsource, area, args):
