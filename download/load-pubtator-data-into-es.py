@@ -31,6 +31,9 @@ date_replacements = {   ' / ': '/',
                         'Winter': 'Feb'     }
 mon_replacements = {mon.title():str(i+1) for i,mon in enumerate('jan feb mar apr may jun jul aug sep oct nov dec'.split())}
 
+annotation_camel2segment = re.compile(r'([a-z])([A-Z])')
+
+
 
 def datefmt(unit, maxval):
     if unit and unit.isdecimal():
@@ -113,7 +116,8 @@ for line in open(options.file):
                 infons = a['infons']
                 lookup = infons.get('identifier')
                 txt = id2shortname.get(lookup)
-                annotations[infons['type'].lower()].add(txt or a['text'].lower())
+                annotation = annotation_camel2segment.sub(r'\1-\2', infons['type']).lower() # "cellLine" -> "cell-line"
+                annotations[annotation].add(txt or a['text'].lower())
             # manual annotations
             text = passage.get('text')
             if text:

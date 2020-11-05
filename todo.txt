@@ -50,11 +50,13 @@
 +Lägg Twitter-uppdateringen i docker compose.
 +Sampla in ett nytt PubTator-ämne med lång stride för att få in många år, så man kan se utv. över tid.
 +Fixa konfiguration för vilka annotationer som ska plockas bort.
-+Läs in konfigurationen regelbundet, runtime - så att det räcker med git pull för att uppdatera.
++Läs in konfigurationen runtime - så att det räcker med git pull för att uppdatera.
++Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
 
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
+Fixa cellline -> "cell line"
 Dokumentera twitter-bakgrundsuppdatering
 Dokumentera.
 
@@ -67,8 +69,6 @@ Nätverksgraf?
 Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 Strömma Twitter-data och uppdatera grafen löpande.
 Länkar för Gene, Chemical och disease
-Fixa cellline -> "cell line"
-Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
 Filter på datum (slider?)
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc
 Få in ontologier/hierarkier (gene ontology, mesh (för chem och disease)
