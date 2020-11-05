@@ -52,8 +52,9 @@
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
-Dokumentera twitter-bakgrundsuppdatering
 Sampla in ett nytt PubTator-ämne med lång stride för att få in många år, så man kan se utv. över tid.
+Fixa konfiguration för vilka annotationer som ska plockas bort.
+Dokumentera twitter-bakgrundsuppdatering
 Dokumentera.
 
 Överlämning.

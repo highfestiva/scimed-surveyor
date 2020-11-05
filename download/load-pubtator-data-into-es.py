@@ -17,10 +17,11 @@ parser.add_argument('file', help='JSON file containing pubtator data')
 options = parser.parse_args()
 
 
-journal_split_regexp = re.compile(r'[\.;,]')
-date_match = re.compile(r'(19\d\d|20\d\d)')
+journal_split_regexp = re.compile(r'[\.;,\(\)]')
+year_match = re.compile(r'(19\d\d|20\d\d)')
 date_end_fix = re.compile(r'[A-Za-z]{3}[-/]([A-Za-z]{3})')
-date_pick = re.compile(r'(\d{4}) .*?([A-Z][a-z]{2}|\d\d)\s*(\d{1,2}|)\b.*')
+date_search = re.compile(r'(\d{4}$|\d{4} +[A-Z][a-z]{2}|\d{4} +\d|\d{4}-\d)')
+date_pick = re.compile(r'(\d{4})[ \-]+([A-Z][a-z]{2}|\d\d)\s*(\d{1,2}|)\b.*')
 date_replacements = {   ' / ': '/',
                         ' - ': '-',
                         'Spring': 'May',
@@ -92,18 +93,19 @@ for line in open(options.file):
                     journal = passage['infons']['journal']
                     orig_date = journal
                     dates = [s.strip() for s in journal_split_regexp.split(journal)]
-                    dates = [s for s in dates if date_match.match(s)]
+                    dates = [s for s in dates if year_match.match(s)]
                     if dates:
-                        date = dates[0]
+                        date_ = dates[0]
                         for k,v in date_replacements.items():
-                            date = date.replace(k,v)
-                        date = date_end_fix.sub(r'\1', date)
-                        ymd = date_pick.sub(r'\1 \2 \3', date).split()
-                        ymd += [''] * (3-len(ymd))
-                        year,month,day = ymd
-                        for k,v in mon_replacements.items():
-                            month = month.replace(k,v)
-                        date = year + datefmt(month, 12) + datefmt(day, 31)
+                            date_ = date_.replace(k,v)
+                        date_ = date_end_fix.sub(r'\1', date_)
+                        if date_search.match(date_):
+                            ymd = date_pick.sub(r'\1 \2 \3', date_).split()
+                            ymd += [''] * (3-len(ymd))
+                            year,month,day = ymd
+                            for k,v in mon_replacements.items():
+                                month = month.replace(k,v)
+                            date = year + datefmt(month, 12) + datefmt(day, 31)
                         # print(date, orig_date, title)
             # add annotations
             pas = passage.get('annotations') or []

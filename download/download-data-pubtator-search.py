@@ -3,11 +3,15 @@
 import argparse
 import json
 import requests
+from time import sleep, time
 
+
+pubmed_rate_limit_hz = 3 # without (free) api key, only 3/s allowed
 
 parser = argparse.ArgumentParser()
 parser.add_argument('search', nargs='+', help='search term, e.g. "cardiac failure"')
 parser.add_argument('--limit', default=1000, type=int, help='number or articles to fetch from pubmed')
+parser.add_argument('--stride', default=1, type=int, help='sample every N article')
 options = parser.parse_args()
 
 
@@ -16,15 +20,26 @@ articles = []
 idx = 0
 while idx < options.limit:
     limit = 1000 if options.limit>=1000 else options.limit
-    url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retstart=%i&retmax=%s&term=%s' % (idx, limit, term)
+    url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&retmode=json&retstart=%i&retmax=%s&sort=date&term=%s' % (idx, limit, term)
     print(url[:130], end='\r')
+    t0 = time()
     info = requests.get(url).json()
+    dt = time() - t0 - 1/pubmed_rate_limit_hz + 0.01 # stay within request frequency
+    if dt > 0:
+        sleep(dt)
+    if 'esearchresult' not in info:
+        print()
+        print('rate limiting...')
+        sleep(2)
+        continue
     article_ids = info['esearchresult']['idlist']
     articles += article_ids
     idx += len(article_ids)
     if len(article_ids) < 990:
         break
 print()
+
+articles = articles[::options.stride]
 
 name = term.replace('"','')
 name = '-'.join(name.split('+')[:5])

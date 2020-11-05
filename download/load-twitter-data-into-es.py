@@ -6,6 +6,7 @@ from elasticsearch import Elasticsearch
 from extra_annotations import extra_annotations
 import json
 import organizations
+from os import getenv
 import re
 
 
@@ -67,7 +68,8 @@ for fname,topic,heads in [('c2020.bin','chemical',('NM =','SY =')), ('d2020.bin'
 print('term list size:', len(term2topic_name))
 
 
-es = Elasticsearch([{'host': 'localhost', 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
+eshost = getenv('ESHOST', 'localhost')
+es = Elasticsearch([{'host': eshost, 'port': 9200}], http_auth=('elastic', open('.espassword').read().strip()))
 if options.reset_index:
     print('deleting index', options.index)
     es.indices.delete(index=options.index, ignore=[400, 404])
