@@ -291,7 +291,7 @@ def docs2df(docs, time_zone_offset, sample_t):
 def create_date_plot(dsource, df, sample_t, legend):
     x0,x1 = x_rng_percentile(dsource, df, 1)
     ymax = df.n.max() * 1.05
-    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,wheel_zoom,reset', active_scroll='wheel_zoom')
+    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,xwheel_zoom,reset', active_scroll='xwheel_zoom')
     p.toolbar.logo = None
     dtf = DatetimeTickFormatter()
     dtf.milliseconds = ['%T']

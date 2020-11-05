@@ -9,4 +9,8 @@ page_settings = {
     'pubtator-tech': {
         'filter': [{'medicine':['telemedicine']}, {'ai':['classifier']}],
 	}
+
+    'pubtator-pancreatic-cancer': {
+        'filter': [{'medicine':['surgery']}, {'chemical':['gemcitabine']}],
+	}
 }
