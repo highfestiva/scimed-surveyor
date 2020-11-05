@@ -1,5 +1,4 @@
-page_settings = {
-
+{
     '<default>': {
         'exclude-annotations': ['species'],
     },

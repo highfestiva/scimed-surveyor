@@ -7,7 +7,6 @@ from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
 from bokeh.plotting import figure
 import calendar
 from collections import defaultdict
-from conf.settings import page_settings
 from copy import deepcopy
 from elasticsearch import Elasticsearch
 from flask import Flask, jsonify, request, render_template, send_from_directory
@@ -259,8 +258,8 @@ def nounify(dsource):
     return 'tweets' if dsource=='twitter' else 'articles'
 
 
-def _get_setting(key_parts):
-    d = page_settings
+def _get_setting(settings_dict, key_parts):
+    d = settings_dict
     v = None
     for k in key_parts:
         if k in d:
@@ -271,10 +270,11 @@ def _get_setting(key_parts):
 
 
 def get_setting(key, default=None):
+    settings_dict = eval(open('conf/settings.py').read())
     key_parts = key.split('.')
-    val = _get_setting(key_parts)
+    val = _get_setting(settings_dict, key_parts)
     if val is None:
-        val = _get_setting(['<default>']+key_parts[1:])
+        val = _get_setting(settings_dict, ['<default>']+key_parts[1:])
     if val is None:
         val = default
     return val
