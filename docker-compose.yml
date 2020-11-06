@@ -35,14 +35,10 @@ services:
     image: docker.elastic.co/kibana/kibana:7.9.2
     ports:
       - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elastic:9200
-      - SERVER_BASEPATH=/kibana
-      - SERVER_REWRITEBASEPATH=true 
-    env_file:
-      - ./elasticsearch-data/.env
     depends_on:
       - elastic
+    volumes:
+      - ./elasticsearch-data/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
 
   twitter-updater:
     build: download/autoupdate

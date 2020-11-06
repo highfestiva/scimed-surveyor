@@ -1,6 +1,9 @@
 #!/bin/bash
 
-echo ELASTIC_PASSWORD=`cat download/.espassword` > elasticsearch-data/.env
+export ELASTIC_PASSWORD=`cat download/.espassword`
+echo ELASTIC_PASSWORD=$ELASTIC_PASSWORD > elasticsearch-data/.env
+cat elasticsearch-data/kibana.yml.template | envsubst > elasticsearch-data/kibana.yml
+
 cp download/journal_util.py download/.espassword http-server/
 cp download/*.py download/.twitterkey.py download/.espassword download/autoupdate/
 cp download/data/?202?.bin download/autoupdate/data/
