@@ -184,9 +184,9 @@ def sum_annotations(index, docs, only_annotation):
             if only_annotation and k != only_annotation:
                 continue
             for label in v:
+                label = label.replace('_', ' ')
                 if label in skip_label_set:
                     continue
-                label = label.replace('_', ' ')
                 annotations[k][label] += 1
     return annotations
 
