@@ -76,11 +76,11 @@ PubTator pages shows a map over which countries the articles were published in.
 
 Data is pre-processed before entered into [Elasticsearch](https://www.elastic.co/), so very little processing
 is required in the web app. The article search is (currently) a single html file
-([research.html](scimed-surveyor/blob/master/http-server/templates/research.html)), which contain both html and
+([research.html](blob/master/http-server/templates/research.html)), which contain both html and
 javascript for fetching the data and plots, and some minor click handing into the DOM.
 
-There is also a separate web page for comparing annotations ([compare-annotations.html](scimed-surveyor/blob/master/http-server/templates/compare-annotations.html)),
-and a landing page which loads all indices and default filters ([landing.html](scimed-surveyor/blob/master/http-server/templates/landing.html)).
+There is also a separate web page for comparing annotations ([compare-annotations.html](blob/master/http-server/templates/compare-annotations.html)),
+and a landing page which loads all indices and default filters ([landing.html](blob/master/http-server/templates/landing.html)).
 
 Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the charts, and the web server
 [Flask](https://flask.palletsprojects.com/en/1.1.x/) to produce end-points. Flask uses
@@ -90,8 +90,9 @@ Python uses the plotting-library [Bokeh](https://bokeh.org/) to generate the cha
 The Country shape data was downloaded 2020-10-26 from [github](https://raw.githubusercontent.com/dmillz/misc/master/shapefiles/ne_10m_admin_0_countries_lakes-EPSG_3857.zip).
 That shape has a EPSG:3857 projection (also called "WGS 84" and "Pseudo-Mercator"), which is what's used in
 most online maps. The original shape can be downloaded from [Natural Earth](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/).
-The shape data is further pre-processed by the script [map2json.py](scimed-surveyor/blob/master/http-server/map2json.py)
-which extracts the relevant countries and stores their shapes in `http-server/data/`. That script requires [geopandas](https://geopandas.org/).
+The shape data is further pre-processed by the script [map2json.py](blob/master/http-server/map2json.py)
+which extracts the relevant countries and stores their shapes in `http-server/data/`. The [map2json.py](blob/master/http-server/map2json.py)
+script requires [geopandas](https://geopandas.org/).
 
 
 ### Configuration of pages
@@ -101,13 +102,13 @@ pages are linked from the landing page. This is also where they get their defaul
 One link to a topic could be http://host:port/pubtator/pancreatic-cancer?filter=%5B%7B%22medicine%22%3A%5B%22surgery%22%5D%7D%2C%7B%22chemical%22%3A%5B%22gemcitabine%22%5D%7D%5D
 , where the filter parameter decodes to `[{"medicine":["surgery"]},{"chemical":["gemcitabine"]}]`.
 
-When clicking on the link, the user is taken to atopic page where she is free to modify her session filters
+When clicking on the link, the user is taken to a topic page where she is free to modify her session filters
 using the [x] and [Compare] buttons. All filters are carried by the URL, nothing is stored in cookies or
 otherwise.
 
-The default filters and other settings are configurable in `http-server/conf/settings.py`. That file is
-loaded runtime, and changing it does not require you to re-deploy the docker containers. This is what
-`settings.py` look like:
+The default filters and other settings are configurable in [http-server/conf/settings.py](blob/master/http-server/conf/settings.py).
+That file is loaded runtime, and changing it does not require you to re-deploy the docker containers. This is
+what `settings.py` look like:
 
 ````python
 {
@@ -133,27 +134,35 @@ The `<default>` key is what's used if a sub-key of a specific topic is missing. 
 the default filter (linked from the landing page). There are a couple of keys worth mentioning:
 
 * `period` defaults to daily, but for Twitter we use hourly.
-* `map` defaults to True, but for Twitter there is country metadata.
+* `map` defaults to True, but for Twitter there is no country metadata.
 
 
-## [Docker](https://www.docker.com/) setup
+## Docker setup
 
 [Docker Compose](https://docs.docker.com/compose/) is used to start Elasticsearch, Kibana, the web server,
 the reverse proxy (nginx), the twitter updater, etc. Kibana is mapped in under /kibana/ by nginx.
 
 Docker Compose starts a number of containers, but allows you to have dependencies and share network between
 them without additional setup. It's a beautiful way to build and run the five applications with very little
-overhead. See [docker-compose.yml](scimed-surveyor/blob/master/docker-compose.yml).
+overhead. See [docker-compose.yml](blob/master/docker-compose.yml).
 
 Some data is mapped to the host file system, such as the Elasticsearch database. That way, it does not need
 to be re-created if the elastic docker container is restarted. Other files that are kept in the host file
 system include `http-server/conf/`, `download/autoupdate/data/` (where the Twitter history is kept) and
-`nginx/nginx.conf`. The configuration files are kept on the host filesystem so no docker rebuild is required
-to update the configurations (`git pull` or local edit is enough).
+`nginx/nginx.conf`. The configuration files are kept on the host filesystem so no docker rebuild is
+required to update the configurations (`git pull` or local edit is enough).
 
 Elasticsearch, Kibana and nginx use default docker setup, while http-server and twitter-updater require a
-Dockerfile each ([http-server/Dockerfile](scimed-surveyor/blob/master/http-server/Dockerfile) and
-[download/autoupdate/Dockerfile](scimed-surveyor/blob/master/download/autoupdate/Dockerfile)).
+Dockerfile each ([http-server/Dockerfile](blob/master/http-server/Dockerfile) and
+[download/autoupdate/Dockerfile](blob/master/download/autoupdate/Dockerfile)).
+
+
+# nginx setup
+
+[nginx](https://www.nginx.com/) is a reverse proxy, used to map Elasticsearch and Kibana into the same
+port as http-server, so they're reachable from internet. The configuration is kept in the file [nginx.conf](blob/master/nginx/nginx.conf).
+
+Everything is currently running on port 8080. To instead run on 80, simply update [docker-compose.yml](blob/master/docker-compose.yml).
 
 
 ## Download and inject new PubTator topics
@@ -184,7 +193,7 @@ To install those downloaded articles, run:
 Approximate throughput of download is 170 articles/s. Elasticsearch insert throughput is approximately 570
 articles/s. Go to http://host:port/pubtator/prostate-cancer to see the new topic.
 
-If you wish to tag the data with Spacy's organization resolution, add a switch:
+If you wish to tag the data with Spacy's organization resolution, add a `--tag-organizations` switch:
 
 ````bash
 ./load-pubtator-data-into-es.py --index pubtator-prostate-cancer --tag-organizations data/prostate+cancer.json
@@ -197,9 +206,9 @@ Neural Network in 100% of the cases.
 
 ## Inner workings of Twitter updater
 
-New Twitter data is downloaded every hour by the shell script [download/autoupdate/fetch-latest-ai-tweets.sh](scimed-surveyor/blob/master/download/autoupdate/fetch-latest-ai-tweets.sh).
+New Twitter data is downloaded every hour by the shell script [download/autoupdate/fetch-latest-ai-tweets.sh](blob/master/download/autoupdate/fetch-latest-ai-tweets.sh).
 Currently that script and the related python scripts are made for tweets only, but could be adapted for
-any kind of "article".
+any kind of document.
 
 The shell script runs in infinite loop which sleeps until a couple of minutes past every hour, then
 looks into the Elasticsearch index to see what hour the latest tweet were registered. That is used as
@@ -230,13 +239,13 @@ git pull
 ./redeploy.sh
 ````
 
-That same procedure applies to updating the twitter-updater code. If you only update `http-server/conf` or
-`nginx/conf/` you can skip the last step.
+That same procedure applies to updating the twitter-updater code. If you only update [settings.py](blob/master/http-server/conf/settings.py)
+or [nginx/conf/nginx.conf](blob/master/nginx/conf/nginx.conf) you can skip the last re-deploy step.
 
 
 # Backing up Elasticsearch data
 
-Copy the folder `elasticsearch-data/` and all it's subfolder, and you're done.
+Copy the folder `elasticsearch-data/` and all it's subfolder somewhere safe, and you're done.
 
 
 ## Improvements
@@ -245,13 +254,13 @@ It's currently slow to insert a lot of article data into the Elasticsearch datab
 updates, but wasn't able to. Fixing that would probably speed up the process when handling tens of
 thousands of documents.
 
-Some caching (RAM) is added internally in [http-server.py](scimed-surveyor/blob/master/http-server/http-server.py),
+Some caching (RAM) is added internally in [http-server.py](blob/master/http-server/http-server.py),
 and a little in nginx, but more could probably be done to improve performance.
 
-Performance when loading tens of thousands of articles is low. Improvements are probably found in
-Elasticsearch, Bokeh use.
+Performance when loading tens of thousands of articles is bad. Improvements are probably mostly found in
+Elasticsearch indexing and Bokeh use.
 
 The map is really slow. One reason is that the country geometry definitions have too high resolution,
 for instance downloading 55 countries yields a 5.9 MB gzipped JSON, or 200 times bigger than a time
-series over 20k articles. That high resolution also makes zooming/panning on the map an excrutiating
+series on 20k articles. That high resolution also makes zooming/panning the map an excrutiating
 experience.
