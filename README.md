@@ -96,6 +96,9 @@ cd download/
 # open browser towards http://host:8080/pubtator/covid-19
 ````
 
+Sometimes the Elasticsearch database doesn't start fast enough, so http-server can't connect to it when
+starting up (`docker ps` doesn't show `http-server_1`). In that case, simply run `./redeploy.sh` again.
+
 
 ## Internal design of web server
 
