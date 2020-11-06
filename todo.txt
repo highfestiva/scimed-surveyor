@@ -52,11 +52,11 @@
 +Fixa konfiguration för vilka annotationer som ska plockas bort.
 +Läs in konfigurationen runtime - så att det räcker med git pull för att uppdatera.
 +Se till att datum följer yyyy-mm-dd (år kan misstolkas som femsiffrigt)
++Fixa cellline -> "cell line"
 
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
-Fixa cellline -> "cell line"
 Dokumentera twitter-bakgrundsuppdatering
 Dokumentera.
 

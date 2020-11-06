@@ -174,14 +174,18 @@ def _fetch_docs(index, annotations):
 
 def sum_annotations(index, docs, only_annotation):
     skip_annotations = set(get_setting(index+'.exclude-annotations', default=[]))
+    skip_labels = get_setting(index+'.exclude-labels', default={})
     annotations = defaultdict(lambda: defaultdict(int))
     for doc in docs:
         for k,v in doc['annotations'].items():
             if k in skip_annotations:
                 continue
+            skip_label_set = set(skip_labels.get(k, []))
             if only_annotation and k != only_annotation:
                 continue
             for label in v:
+                if label in skip_label_set:
+                    continue
                 label = label.replace('_', ' ')
                 annotations[k][label] += 1
     return annotations

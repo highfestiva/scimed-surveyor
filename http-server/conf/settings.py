@@ -1,6 +1,7 @@
 {
     '<default>': {
         'exclude-annotations': ['species'],
+        'exclude-labels': {'disease': ['Learning Disabilities']},
     },
 
     'twitter-tech': {
