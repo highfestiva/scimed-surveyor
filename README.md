@@ -162,7 +162,7 @@ Dockerfile each ([http-server/Dockerfile](http-server/Dockerfile) and
 [nginx](https://www.nginx.com/) is a reverse proxy, used to map Elasticsearch and Kibana into the same
 port as http-server, so they're reachable from internet. The configuration is kept in the file [nginx.conf](nginx/nginx.conf).
 
-Everything is currently running on port 8080. To instead run on 80, simply update [docker-compose.yml](docker-compose.yml).
+Everything is currently running on port 8080. To instead run on 80, simply update the nginx entry in [docker-compose.yml](docker-compose.yml).
 
 
 ## Download and inject new PubTator topics
@@ -212,9 +212,9 @@ any kind of document.
 
 The shell script runs in infinite loop which sleeps until a couple of minutes past every hour, then
 looks into the Elasticsearch index to see what hour the latest tweet were registered. That is used as
-a starting-point and each half-hour (`--stride-time 30:00`) since that time is downloaded. (The reason
+a starting-point and each half-hour, `--stride-time 30:00`, since that time is downloaded. (The reason
 I chose half-hours is that Twitter imposes a download limit per period of 100 tweets, and for our
-current "AI" use 30 minutes is well in range without generating much overhead.)
+current "AI" search 30 minutes is well in range without generating much overhead.)
 
 Only Twitter supports incremental Elasticsearch index updates. The PubTator load script always deletes
 the old index before inserting new data.
@@ -240,10 +240,10 @@ git pull
 ````
 
 That same procedure applies to updating the twitter-updater code. If you only update [settings.py](http-server/conf/settings.py)
-or [nginx/conf/nginx.conf](nginx/conf/nginx.conf) you can skip the last re-deploy step.
+or [nginx.conf](nginx/conf/nginx.conf) you can skip the last re-deploy step.
 
 
-# Backing up Elasticsearch data
+# Backup of Elasticsearch data
 
 Copy the folder `elasticsearch-data/` and all it's subfolder somewhere safe, and you're done.
 
@@ -254,13 +254,13 @@ It's currently slow to insert a lot of article data into the Elasticsearch datab
 updates, but wasn't able to. Fixing that would probably speed up the process when handling tens of
 thousands of documents.
 
-Some caching (RAM) is added internally in [http-server.py](http-server/http-server.py),
-and a little in nginx, but more could probably be done to improve performance.
+Some caching in RAM is used internally in [http-server.py](http-server/http-server.py), and a little
+cache exists in nginx, but more could probably be done to improve performance.
 
 Performance when loading tens of thousands of articles is bad. Improvements are probably mostly found in
 Elasticsearch indexing and Bokeh use.
 
 The map is really slow. One reason is that the country geometry definitions have too high resolution,
-for instance downloading 55 countries yields a 5.9 MB gzipped JSON, or 200 times bigger than a time
+for instance downloading 55 countries yields a 5.9 MB gzipped JSON, or 200 times larger than a time
 series on 20k articles. That high resolution also makes zooming/panning the map an excrutiating
 experience.
