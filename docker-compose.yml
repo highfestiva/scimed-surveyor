@@ -39,6 +39,8 @@ services:
       - ELASTICSEARCH_HOSTS=http://elastic:9200
       - SERVER_BASEPATH=/kibana
       - SERVER_REWRITEBASEPATH=true 
+    env_file:
+      - ./elasticsearch-data/.env
     depends_on:
       - elastic
 
