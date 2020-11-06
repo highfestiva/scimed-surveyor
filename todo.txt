@@ -59,6 +59,7 @@
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
+Kibana lösen till ES?
 Testa deploy från scratch.
 
 Överlämning.
