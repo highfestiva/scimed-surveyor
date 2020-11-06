@@ -55,12 +55,11 @@
 +Fixa cellline -> "cell line"
 +Dokumentera twitter-bakgrundsuppdatering.
 +Dokumentera.
++Kibana lösen till ES?
++Testa deploy från scratch.
 
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
-
-Kibana lösen till ES?
-Testa deploy från scratch.
 
 Överlämning.
 

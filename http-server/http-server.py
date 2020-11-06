@@ -135,7 +135,7 @@ def compare_annotations(dsource, area):
         items = sorted(args.items())
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in items])
         docs = fetch_docs(index=index, annotations=args)
-        plots = create_annotation_plots(docs, limit=10, skip_empty=False)
+        plots = create_annotation_plots(index, docs, limit=10, skip_empty=False)
         filters.append({'title': sargs, 'annotations': json.dumps(plots)})
     return render_template('compare-annotations.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version, filters=filters)
 

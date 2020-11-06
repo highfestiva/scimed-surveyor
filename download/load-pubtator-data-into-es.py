@@ -105,7 +105,7 @@ for line in open(options.file):
                         if date_search.match(date_):
                             ymd = date_pick.sub(r'\1 \2 \3', date_).split()
                             ymd += [''] * (3-len(ymd))
-                            year,month,day = ymd
+                            year,month,day = ymd[:3]
                             for k,v in mon_replacements.items():
                                 month = month.replace(k,v)
                             date = year + datefmt(month, 12) + datefmt(day, 31)

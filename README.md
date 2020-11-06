@@ -20,7 +20,7 @@ another to see how they developed over the time. The system currently supports c
 ## Geting started
 
 In order to download and process PubTator articles, you need a Python environment setup and
-this repository.
+[git](https://git-scm.com/) to download this repository.
 
 ````bash
 sudo me@host
@@ -33,36 +33,67 @@ git clone https://github.com/highfestiva/scimed-surveyor.git
 cd scimed-surveyor/
 ````
 
-The rest happens inside docker containers, so no need for runtime libraries.
+The rest happens inside docker containers, so no need for runtime libraries. Apart from docker-compose,
+of course.
 
 
-### Setting Elasticsearch password
+### Setting passwords
 
 The default username is used by Elasticsearch, but the password must be set manually. Something like this:
 
 ````bash
-echo "my-v3ry.s8rt_p4zzwrd" > download/.espassword`
+echo "my-v3ry.s8rt_p4zzwrd" > download/.espassword
 ````
 
 That file, `.espassword`, is used in a number of places, but no more manual editing/copying should be required.
 
+Twitter keys are also required. They should be entered into `download/.twitterkey.py` like so:
+
+````python
+api_key = 'abcdef'
+api_secret = 'GHIJKLM'
+bearer_token = 'AAAAAAAAAAAAAAAAAAAAANOPQRSTUVWXYZ'
+````
+
 
 ### Your first run
 
+If you don't have a `countries.json` file for the map yet, you need to generate it.
+
 ````bash
-cd scimed-surveyor/
+# download first
+cd http-server/data/
+curl https://raw.githubusercontent.com/dmillz/misc/master/shapefiles/ne_10m_admin_0_countries_lakes-EPSG_3857.zip > countries.zip
+unzip countries.zip
 
-# build and run docker containers
-./redeploy.sh
+# install tooling and generate
+python3 -m pip install -U pip
+pip3 install geopandas
+cd ..
+./map2json.py
+rm data/*.zip data/ne_* # cleanup - remote intermediates
+cd ..
+````
 
-# download some articles
-cd download
+
+Then we download some data. The meta-data downloaded is required by the Twitter updater, to be able to
+annotate all tweets.
+
+````bash
+cd download/
+
+# download some articles and meta-data
 ./download-data-pubtator-covid-19.sh
 
-# save into elasticsearch
-./load-pubtator-into-es.py --index pubtator-covid-19 --file data/litcovid2pubtator.json
+# build and run docker containers
+cd ..
+./redeploy.sh
 
-# open browser towards localhost:8080/pubtator/covid-19
+# save data into elasticsearch
+cd download/
+./load-pubtator-data-into-es.py --index pubtator-covid-19 --limit 1000 data/litcovid2pubtator.json
+
+# open browser towards http://host:8080/pubtator/covid-19
 ````
 
 
