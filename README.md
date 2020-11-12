@@ -191,7 +191,7 @@ Dockerfile each ([http-server/Dockerfile](http-server/Dockerfile) and
 [download/autoupdate/Dockerfile](download/autoupdate/Dockerfile)).
 
 
-# nginx setup
+## nginx setup
 
 [nginx](https://www.nginx.com/) is a reverse proxy, used to map Elasticsearch and Kibana into the same
 port as http-server, so they're reachable from internet. The configuration is kept in the file [nginx.conf](nginx/nginx.conf).
@@ -277,7 +277,7 @@ That same procedure applies to updating the twitter-updater code. If you only up
 or [nginx.conf](nginx/conf/nginx.conf) you can skip the last re-deploy step.
 
 
-# Backup of Elasticsearch data
+## Backup of Elasticsearch data
 
 Copy the folder `elasticsearch-data/` and all it's subfolder somewhere safe, and you're done.
 
@@ -298,3 +298,6 @@ The map is really slow. One reason is that the country geometry definitions have
 for instance downloading 55 countries yields a 5.9 MB gzipped JSON, or 200 times larger than a time
 series on 20k articles. That high resolution also makes zooming/panning the map an excrutiating
 experience.
+
+I didn't have time to implement date filter resetting. Currently there is a button (red [X]) to remove
+the annotation filter, but nothing for the date.
