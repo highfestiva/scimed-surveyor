@@ -2,7 +2,8 @@
 
 import bokeh
 from bokeh.embed import json_item
-from bokeh.models import ColumnDataSource, CustomJS
+from bokeh.events import SelectionGeometry
+from bokeh.models import ColumnDataSource, CustomJS, PanTool, BoxSelectTool, BoxSelectTool, WheelZoomTool, ResetTool
 from bokeh.models.formatters import DatetimeTickFormatter, FuncTickFormatter
 from bokeh.plotting import figure
 import calendar
@@ -323,7 +324,25 @@ def docs2df(docs, time_zone_offset, sample_t):
 def create_date_plot(dsource, df, sample_t, legend):
     x0,x1 = x_rng_percentile(dsource, df, 1)
     ymax = df.n.max() * 1.05
-    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools='pan,box_zoom,xwheel_zoom,reset', active_scroll='xwheel_zoom')
+
+    # handle callback for box zoom
+    box_select_callback = CustomJS(code='''
+        var geometry = cb_obj["geometry"];
+        var t0 = geometry["x0"];
+        var t1 = geometry["x1"];
+        t0 = new Date(t0-t0%{sample_t}).toISOString();
+        t1 = new Date(t1-t1%{sample_t}).toISOString();
+        var url = new URL(window.location.href);
+        url.searchParams.set("start_t", t0);
+        url.searchParams.set("end_t", t1);
+        window.location.assign(url);
+    '''.format(sample_t=sample_t))
+    box_select = BoxSelectTool(js_event_callbacks={'done':[box_select_callback]})
+    xwheel_scroll = WheelZoomTool(dimensions="width")
+    tools = [PanTool(), box_select, xwheel_scroll, ResetTool()]
+
+    p = figure(x_range=(x0, x1), y_range=(0,ymax), x_axis_type='datetime', sizing_mode='stretch_both', tools=tools, active_scroll=xwheel_scroll)
+    p.js_on_event(SelectionGeometry, box_select_callback)
     p.toolbar.logo = None
     dtf = DatetimeTickFormatter()
     dtf.milliseconds = ['%T']

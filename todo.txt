@@ -58,6 +58,8 @@
 +Kibana lösen till ES?
 +Testa deploy från scratch.
 
+~Filter på datum (slider?)
+
 Använd VGR:s twitter-konto-nycklar.
 VGR-github?
 
@@ -70,7 +72,6 @@ Nätverksgraf?
 Hitta entitetstyper i text (via Spacy eller string matching) - t.ex. om man kör eHealth, AI mm
 Strömma Twitter-data och uppdatera grafen löpande.
 Länkar för Gene, Chemical och disease
-Filter på datum (slider?)
 Ev nån mer graf/plot. Kanske nätverksgraf, karta etc
 Få in ontologier/hierarkier (gene ontology, mesh (för chem och disease)
 
