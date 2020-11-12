@@ -33,7 +33,8 @@ days_ms = 24*hours_ms
 es_query = {
     'query': {
         'bool': {
-            'must': []
+            'must': [],
+            'filter': []
         }
     }
 }
@@ -71,12 +72,12 @@ def plot_main(dsource, area):
     l_args = get_l_args()
     time_zone_offset = int(request.values.get('tz', '0')) * minutes_ms
     sample_t = get_setting(index+'.period', days_ms)
-    docs = fetch_docs(index=index, annotations=l_args[0])
+    docs = fetch_docs(index=index, _filter=l_args[0])
     main_plot = create_main_plot(docs, dsource, area, l_args, time_zone_offset=time_zone_offset, sample_t=sample_t)
     for i,sargs in enumerate(l_args[1:]):
-        docs2 = fetch_docs(index=index, annotations=sargs)
+        docs2 = fetch_docs(index=index, _filter=sargs)
         df = docs2df(docs2, time_zone_offset, sample_t)
-        add_line(main_plot['plot'], df, color=i+1, legend=args2str(dsource, area, sargs))
+        add_line(main_plot['plot'], df, color=i+1, legend=args2str(dsource, area, sargs)[0])
     main_plot['plot'] = json_item(main_plot['plot'])
     plots = create_annotation_plots(index, docs, limit=7)
     articles = tweetify(docs) if dsource == 'twitter' else articlify(docs)
@@ -91,7 +92,7 @@ def plot_world_map(dsource, area):
     try:
         index = '%s-%s' % (dsource, area)
         l_args = get_l_args()
-        docs = fetch_docs(index=index, annotations=l_args[0])
+        docs = fetch_docs(index=index, _filter=l_args[0])
         cc2score = defaultdict(int)
         for doc in docs:
             journal,doip = journal_util.extract(doc['journal'])
@@ -112,7 +113,7 @@ def plot_world_map(dsource, area):
 def list_labels(dsource, area, annotation):
     index = '%s-%s' % (dsource, area)
     l_args = get_l_args()
-    docs = fetch_docs(index=index, annotations=l_args[0])
+    docs = fetch_docs(index=index, _filter=l_args[0])
     annotations = sum_annotations(index, docs, only_annotation=annotation)
     for k,v in annotations.items():
         annotations[k] = sorted(v.items(), key=lambda kv:-kv[1])
@@ -134,34 +135,49 @@ def compare_annotations(dsource, area):
     for args in get_l_args():
         items = sorted(args.items())
         sargs = ' AND '.join([('%s=%s'%(k,v)) for k,v in items])
-        docs = fetch_docs(index=index, annotations=args)
+        docs = fetch_docs(index=index, _filter=args)
         plots = create_annotation_plots(index, docs, limit=10, skip_empty=False)
         filters.append({'title': sargs, 'annotations': json.dumps(plots)})
     return render_template('compare-annotations.html', bokeh_version=bokeh.__version__, dsource=dsource, area=area, ssver=version, filters=filters)
 
 
 def get_l_args():
-    v = eval(request.args.get('filter', '{}'))
-    if type(v) != list:
-        v = [v]
-    for vv in v:
-        for k,w in vv.items():
-            vv[k] = ','.join(w)
-    return v
+    f = eval(request.args.get('filter', '{}'))
+    if type(f) != list:
+        f = [f]
+    for ff in f:
+        for k,w in ff.items():
+            ff[k] = ','.join(w)
+    if start_t := request.args.get('start_t'):
+        for ff in f:
+            ff['start_t'] = start_t
+    if end_t := request.args.get('end_t'):
+        for ff in f:
+            ff['end_t'] = end_t
+    print('date interval:', start_t, end_t)
+    return f
 
 
-def fetch_docs(index, annotations=None):
-    return deepcopy(_fetch_docs(index, frozendict(annotations)))
+def fetch_docs(index, _filter):
+    annotations = {k:v for k,v in _filter.items() if k not in ('start_t','end_t')}
+    start_t = _filter.get('start_t')
+    end_t = _filter.get('end_t')
+    return deepcopy(_fetch_docs(index, frozendict(annotations), start_t=start_t, end_t=end_t))
 
 
 @lru_cache(maxsize=4)
-def _fetch_docs(index, annotations):
+def _fetch_docs(index, annotations, start_t, end_t):
     kwargs = {}
-    if annotations:
+    if annotations or start_t or end_t:
         kwargs = {'body': deepcopy(es_query)}
         kwargs['body']['query']['bool']['must'] = [{'match': {'annotations.'+k:vv.strip('#').replace(' ','_')}} for k,v in annotations.items() for vv in v.split(',')]
+        if start_t or end_t:
+            drange = {'gte':start_t} if start_t else {}
+            drange.update({'lte':end_t} if end_t else {})
+            kwargs['body']['query']['bool']['filter'] = [{'range':{'date':drange}}]
         print(kwargs)
     docs = []
+    print('reading db')
     r = es.search(index=index, size=chunk_hits, scroll='2s', **kwargs)
     while len(r['hits']['hits']):
         docs.extend(r['hits']['hits'])
@@ -199,8 +215,8 @@ def create_main_plot(docs, dsource, area, l_args, time_zone_offset, sample_t):
     dsourcename = '' if nouns=='tweets' else dsource
     main_title = '%i %s %s %s' % (len(docs), area, dsourcename, nouns)
     filter_suffix = ''
-    sargs = args2str(dsource, area, l_args[0])
-    if l_args[0]:
+    sargs,display_args = args2str(dsource, area, l_args[0])
+    if display_args:
         filter_suffix = ' (FILTERED BY %s)' % sargs
         main_title += filter_suffix
     p = create_date_plot(dsource, df, sample_t, legend=sargs if len(l_args)>=2 else None)
@@ -285,9 +301,12 @@ def get_setting(key, default=None):
 
 
 def args2str(dsource, area, args):
-    if not args:
-        return '%s %s (unfiltered)' % (dsource, area)
-    return ' AND '.join([('%s=%s'%(k,v)) for k,v in args.items()])
+    display_args = {k:v for k,v in args.items() if not k.endswith('_t')}
+    if not display_args:
+        s = '%s %s (unfiltered)' % (dsource, area)
+    else:
+        s = ' AND '.join([('%s=%s'%(k,v)) for k,v in display_args.items()])
+    return s, display_args
 
 
 def docs2df(docs, time_zone_offset, sample_t):
